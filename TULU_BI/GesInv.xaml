@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TULU_BI.GesInv"
+             BackgroundColor="#070A13"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="*, Auto">
+
+        <!-- Contenido principal con scroll -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="20" Padding="20,20,20,30">
+
+                <!-- Barra Superior (Perfil, Título y Notificaciones) -->
+                <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,5,0,5">
+                    <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                        <Border StrokeShape="Ellipse" WidthRequest="42" HeightRequest="42" StrokeThickness="0">
+                            <Image Source="dotnet_bot.png" Aspect="AspectFill" />
+                        </Border>
+                        <Label Text="TULU BI" 
+                               TextColor="#00E676" 
+                               FontSize="20" 
+                               FontAttributes="Bold" 
+                               VerticalTextAlignment="Center" />
+                    </HorizontalStackLayout>
+
+                    <Border Grid.Column="2" 
+                            BackgroundColor="#131B2E" 
+                            StrokeShape="Ellipse" 
+                            WidthRequest="42" 
+                            HeightRequest="42" 
+                            StrokeThickness="0"
+                            HorizontalOptions="End" 
+                            VerticalOptions="Center">
+                        <Label Text="🔔" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <!-- Cabecera de la página -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Gestión de Inventario" 
+                           TextColor="White" 
+                           FontSize="22" 
+                           FontAttributes="Bold" />
+                    <Label Text="Monitoreo en tiempo real de activos textiles" 
+                           TextColor="#9CA3AF" 
+                           FontSize="14" />
+                </VerticalStackLayout>
+
+                <!-- Tarjeta 1: Valor Total -->
+                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                        <Border Grid.Column="0" BackgroundColor="#064E3B" StrokeShape="Ellipse" WidthRequest="44" HeightRequest="44" StrokeThickness="0" VerticalOptions="Center">
+                            <Label Text="💲" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                            <Label Text="$45,231" TextColor="White" FontSize="24" FontAttributes="Bold" />
+                            <Label Text="+2.4% vs mes anterior" TextColor="#34D399" FontSize="12" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="2" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 8" Padding="10,4" StrokeThickness="0" VerticalOptions="Start">
+                            <Label Text="VALOR TOTAL" TextColor="#9CA3AF" FontSize="9" FontAttributes="Bold" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Tarjeta 2: Artículos Activos -->
+                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                        <Border Grid.Column="0" BackgroundColor="#064E3B" StrokeShape="Ellipse" WidthRequest="44" HeightRequest="44" StrokeThickness="0" VerticalOptions="Center">
+                            <Label Text="📦" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                            <Label Text="1,248" TextColor="White" FontSize="24" FontAttributes="Bold" />
+                            <Label Text="Unidades en circulación" TextColor="#9CA3AF" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="2" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 8" Padding="10,4" StrokeThickness="0" VerticalOptions="Start">
+                            <Label Text="ARTÍCULOS ACTIVOS" TextColor="#9CA3AF" FontSize="9" FontAttributes="Bold" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Tarjeta 3: Stock Crítico -->
+                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                        <Border Grid.Column="0" BackgroundColor="#451A03" StrokeShape="Ellipse" WidthRequest="44" HeightRequest="44" StrokeThickness="0" VerticalOptions="Center">
+                            <Label Text="⚠️" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                            <Label Text="24" TextColor="#F87171" FontSize="24" FontAttributes="Bold" />
+                            <Label Text="SKUs requieren atención" TextColor="#9CA3AF" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="2" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 8" Padding="10,4" StrokeThickness="0" VerticalOptions="Start">
+                            <Label Text="STOCK CRÍTICO" TextColor="#9CA3AF" FontSize="9" FontAttributes="Bold" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Cabecera de Inventario Crítico -->
+                <Grid ColumnDefinitions="*, Auto" Margin="0,5,0,0">
+                    <Label Grid.Column="0" Text="Inventario Crítico" TextColor="White" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Ver Todos" TextColor="#9CA3AF" FontSize="13" VerticalTextAlignment="Center" />
+                </Grid>
+
+                <!-- Elemento 1: Edredones King Size -->
+                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="18" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                            <Border Grid.Column="0" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 12" WidthRequest="44" HeightRequest="44" StrokeThickness="0" VerticalOptions="Center">
+                                <Label Text="🛏️" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="Edredones King Size" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Línea Premium Hospitality" TextColor="#9CA3AF" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="2" BackgroundColor="#581C87" StrokeShape="RoundRectangle 8" Padding="8,3" StrokeThickness="0" VerticalOptions="Start">
+                                <Label Text="Bajo" TextColor="#F472B6" FontSize="10" FontAttributes="Bold" />
+                            </Border>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,2" />
+
+                        <Grid ColumnDefinitions="*, *">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Stock Actual" TextColor="#9CA3AF" FontSize="11" />
+                                <Label Text="15 unid." TextColor="White" FontSize="14" FontAttributes="Bold" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="End">
+                                <Label Text="Días en Anaquel" TextColor="#9CA3AF" FontSize="11" HorizontalOptions="End" />
+                                <Label Text="42 días" TextColor="#F87171" FontSize="14" FontAttributes="Bold" HorizontalOptions="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Elemento 2: Uniformes de Trabajo -->
+                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="18" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                            <Border Grid.Column="0" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 12" WidthRequest="44" HeightRequest="44" StrokeThickness="0" VerticalOptions="Center">
+                                <Label Text="👔" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="Uniformes de Trabajo" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Sector Industrial M" TextColor="#9CA3AF" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="2" BackgroundColor="#581C87" StrokeShape="RoundRectangle 8" Padding="8,3" StrokeThickness="0" VerticalOptions="Start">
+                                <Label Text="Bajo" TextColor="#F472B6" FontSize="10" FontAttributes="Bold" />
+                            </Border>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,2" />
+
+                        <Grid ColumnDefinitions="*, *">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Stock Actual" TextColor="#9CA3AF" FontSize="11" />
+                                <Label Text="8 unid." TextColor="White" FontSize="14" FontAttributes="Bold" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="End">
+                                <Label Text="Días en Anaquel" TextColor="#9CA3AF" FontSize="11" HorizontalOptions="End" />
+                                <Label Text="15 días" TextColor="#9CA3AF" FontSize="14" FontAttributes="Bold" HorizontalOptions="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Elemento 3: Blancos de Hotelería -->
+                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="18" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                            <Border Grid.Column="0" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 12" WidthRequest="44" HeightRequest="44" StrokeThickness="0" VerticalOptions="Center">
+                                <Label Text="🧺" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="Blancos de Hotelería" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Toallas de Baño Estándar" TextColor="#9CA3AF" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="2" BackgroundColor="#451A03" StrokeShape="RoundRectangle 8" Padding="8,3" StrokeThickness="0" VerticalOptions="Start">
+                                <Label Text="Crítico" TextColor="#F87171" FontSize="10" FontAttributes="Bold" />
+                            </Border>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,2" />
+
+                        <Grid ColumnDefinitions="*, *">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Stock Actual" TextColor="#9CA3AF" FontSize="11" />
+                                <Label Text="2 unid." TextColor="#F87171" FontSize="14" FontAttributes="Bold" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="End">
+                                <Label Text="Días en Anaquel" TextColor="#9CA3AF" FontSize="11" HorizontalOptions="End" />
+                                <Label Text="5 días" TextColor="White" FontSize="14" FontAttributes="Bold" HorizontalOptions="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Barra de Navegación Inferior (Inventario Activo) -->
+        <Border Grid.Row="1" BackgroundColor="#131B2E" StrokeThickness="0" Padding="10,12" StrokeShape="RoundRectangle 24,24,0,0">
+            <Grid ColumnDefinitions="*, *, *, *">
+
+                <!-- Dashboard -->
+                <VerticalStackLayout Grid.Column="0" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnDashboardTapped"/>
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Label Text="❖" FontSize="16" HorizontalOptions="Center" />
+                    <Label Text="DASHBOARD" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- Inventario (Activo en esta página) -->
+                <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="Center">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnInventarioTapped"/>
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Border BackgroundColor="#064E3B" StrokeShape="RoundRectangle 10" WidthRequest="40" HeightRequest="26" StrokeThickness="0" HorizontalOptions="Center">
+                        <Label Text="📦" TextColor="#00E676" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <Label Text="INVENTARIO" TextColor="#00E676" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- Alertas -->
+                <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAlertasTapped"/>
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Label Text="🔔" FontSize="16" HorizontalOptions="Center" />
+                    <Label Text="ALERTAS" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- Analítica -->
+                <VerticalStackLayout Grid.Column="3" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAnaliticaTapped"/>
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Label Text="📊" FontSize="16" HorizontalOptions="Center" />
+                    <Label Text="ANALÍTICA" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+</ContentPage>
