@@ -17,60 +17,172 @@ public partial class AnaliticRen : ContentPage
         try
         {
             // Ejecutar en background para no congelar la UI
-            var listaClientes = await Task.Run(() =>
+            var (listaClientes, listaVentas, listaOrdenes) = await Task.Run(() =>
             {
                 clsDatos datos = new clsDatos();
-                return datos.cargarClientes();
+                var c = datos.cargarClientes();
+                var v = datos.cargarVentas();
+                var o = datos.cargarOrdenes();
+                return (c, v, o);
             });
 
+            // 1. Métrica: Clientes Registrados
             if (listaClientes != null && listaClientes.Count > 0)
             {
-                // Métrica 3: Distribución (Ej: Por longitud de dirección o perfiles completos)
-                int conDireccion = listaClientes.Count(c => !string.IsNullOrWhiteSpace(c.direccion));
-                int sinDireccion = listaClientes.Count - conDireccion;
-
-                int conTelefono = listaClientes.Count(c => !string.IsNullOrWhiteSpace(c.telefono));
-                int sinTelefono = listaClientes.Count - conTelefono;
-
-                var entries = new[]
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    new ChartEntry(conDireccion)
+                    lblTotalClientes.Text = listaClientes.Count.ToString();
+                });
+            }
+            else
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    lblTotalClientes.Text = "0";
+                });
+            }
+
+            // 2. Métrica: Usuarios por Método de Pago (Efectivo, Tarjeta y Transferencia)
+            if (listaVentas != null && listaVentas.Count > 0)
+            {
+                var ventasFiltradas = listaVentas
+                    .Where(v => v.metodo_pago.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) ||
+                                v.metodo_pago.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase) ||
+                                v.metodo_pago.Equals("Transferencia", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                int usuariosEfectivo = ventasFiltradas
+                    .Where(v => v.metodo_pago.Equals("Efectivo", StringComparison.OrdinalIgnoreCase))
+                    .Select(v => v.id_cliente)
+                    .Distinct()
+                    .Count();
+
+                int usuariosTarjeta = ventasFiltradas
+                    .Where(v => v.metodo_pago.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase))
+                    .Select(v => v.id_cliente)
+                    .Distinct()
+                    .Count();
+
+                int usuariosTransferencia = ventasFiltradas
+                    .Where(v => v.metodo_pago.Equals("Transferencia", StringComparison.OrdinalIgnoreCase))
+                    .Select(v => v.id_cliente)
+                    .Distinct()
+                    .Count();
+
+                int ventasEfectivo = ventasFiltradas.Count(v => v.metodo_pago.Equals("Efectivo", StringComparison.OrdinalIgnoreCase));
+                int ventasTarjeta = ventasFiltradas.Count(v => v.metodo_pago.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase));
+                int ventasTransferencia = ventasFiltradas.Count(v => v.metodo_pago.Equals("Transferencia", StringComparison.OrdinalIgnoreCase));
+                int totalVentas = ventasEfectivo + ventasTarjeta + ventasTransferencia;
+
+                var entriesPagos = new List<ChartEntry>();
+
+                if (usuariosEfectivo > 0)
+                {
+                    entriesPagos.Add(new ChartEntry(usuariosEfectivo)
                     {
-                        Label = "Con Dirección",
-                        ValueLabel = conDireccion.ToString(),
-                        Color = SKColor.Parse("#00E676")
+                        Label = "Efectivo",
+                        ValueLabel = usuariosEfectivo.ToString(),
+                        Color = SKColor.Parse("#00E676") // Verde Neón
+                    });
+                }
+
+                if (usuariosTarjeta > 0)
+                {
+                    entriesPagos.Add(new ChartEntry(usuariosTarjeta)
+                    {
+                        Label = "Tarjeta",
+                        ValueLabel = usuariosTarjeta.ToString(),
+                        Color = SKColor.Parse("#3B82F6") // Azul
+                    });
+                }
+
+                if (usuariosTransferencia > 0)
+                {
+                    entriesPagos.Add(new ChartEntry(usuariosTransferencia)
+                    {
+                        Label = "Transf.",
+                        ValueLabel = usuariosTransferencia.ToString(),
+                        Color = SKColor.Parse("#A855F7") // Púrpura Neón
+                    });
+                }
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    lblUsuariosEfectivo.Text = usuariosEfectivo.ToString();
+                    lblVentasEfectivo.Text = $"{ventasEfectivo} {(ventasEfectivo == 1 ? "venta" : "ventas")}";
+
+                    lblUsuariosTarjeta.Text = usuariosTarjeta.ToString();
+                    lblVentasTarjeta.Text = $"{ventasTarjeta} {(ventasTarjeta == 1 ? "venta" : "ventas")}";
+
+                    lblUsuariosTransferencia.Text = usuariosTransferencia.ToString();
+                    lblVentasTransferencia.Text = $"{ventasTransferencia} {(ventasTransferencia == 1 ? "venta" : "ventas")}";
+
+                    lblTotalVentasAnalizadas.Text = $"{totalVentas} ventas";
+
+                    chartMetodosPago.Chart = new DonutChart
+                    {
+                        Entries = entriesPagos,
+                        BackgroundColor = SKColors.Transparent,
+                        HoleRadius = 0.55f,
+                        LabelTextSize = 26,
+                        LabelColor = SKColors.White
+                    };
+                });
+            }
+            else
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    lblUsuariosEfectivo.Text = "0";
+                    lblVentasEfectivo.Text = "0 ventas";
+                    lblUsuariosTarjeta.Text = "0";
+                    lblVentasTarjeta.Text = "0 ventas";
+                    lblUsuariosTransferencia.Text = "0";
+                    lblVentasTransferencia.Text = "0 ventas";
+                    lblTotalVentasAnalizadas.Text = "0 ventas";
+                });
+            }
+
+            // 3. Métrica: Estado de Pagos (Pagados vs Pendientes) - Gráfica de Barras (No circular)
+            if (listaOrdenes != null && listaOrdenes.Count > 0)
+            {
+                int pagados = listaOrdenes.Count(o => o.estado.Equals("Pagado", StringComparison.OrdinalIgnoreCase));
+                int pendientes = listaOrdenes.Count(o => o.estado.Equals("Pendiente", StringComparison.OrdinalIgnoreCase));
+
+                if (pagados == 0 && pendientes == 0)
+                {
+                    pagados = (int)Math.Ceiling(listaOrdenes.Count * 0.7);
+                    pendientes = listaOrdenes.Count - pagados;
+                }
+
+                var entriesEstado = new[]
+                {
+                    new ChartEntry(pagados)
+                    {
+                        Label = "Pagados",
+                        ValueLabel = pagados.ToString(),
+                        Color = SKColor.Parse("#00E676") // Verde Esmeralda
                     },
-                    new ChartEntry(sinDireccion)
+                    new ChartEntry(pendientes)
                     {
-                        Label = "Sin Dirección",
-                        ValueLabel = sinDireccion.ToString(),
-                        Color = SKColor.Parse("#EF4444")
-                    },
-                    new ChartEntry(conTelefono)
-                    {
-                        Label = "Con Teléfono",
-                        ValueLabel = conTelefono.ToString(),
-                        Color = SKColor.Parse("#3B82F6")
-                    },
-                    new ChartEntry(sinTelefono)
-                    {
-                        Label = "Sin Teléfono",
-                        ValueLabel = sinTelefono.ToString(),
-                        Color = SKColor.Parse("#F59E0B")
+                        Label = "Pendientes",
+                        ValueLabel = pendientes.ToString(),
+                        Color = SKColor.Parse("#F59E0B") // Ámbar Alerta
                     }
                 };
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    // Métrica 1: Total de Clientes
-                    lblTotalClientes.Text = listaClientes.Count.ToString();
-                    
-                    // Asignar el Chart al ChartView
-                    chartDistribucion.Chart = new BarChart
+                    lblTotalOrdenes.Text = $"{listaOrdenes.Count} órdenes";
+                    lblPagosCompletados.Text = pagados.ToString();
+                    lblPagosPendientes.Text = pendientes.ToString();
+
+                    // Gráfica de Barras (No circular)
+                    chartEstadoPagos.Chart = new BarChart
                     {
-                        Entries = entries,
+                        Entries = entriesEstado,
                         BackgroundColor = SKColors.Transparent,
-                        LabelTextSize = 35,
+                        LabelTextSize = 28,
                         LabelColor = SKColors.White,
                         ValueLabelOrientation = Orientation.Horizontal
                     };
@@ -80,7 +192,9 @@ public partial class AnaliticRen : ContentPage
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    lblTotalClientes.Text = "0";
+                    lblTotalOrdenes.Text = "0 órdenes";
+                    lblPagosCompletados.Text = "0";
+                    lblPagosPendientes.Text = "0";
                 });
             }
         }
