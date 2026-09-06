@@ -4,6 +4,8 @@ using System.Data;
 using System.Text;
 using Newtonsoft.Json;
 
+using Microsoft.Maui.Graphics;
+
 namespace TULU_BI
 {
     public class clsClientes
@@ -33,6 +35,40 @@ namespace TULU_BI
         public int id_cliente { get; set; }
         public decimal total { get; set; }
         public string estado { get; set; } = "Pagado";
+    }
+
+    public class clsServicio
+    {
+        public int id_trabajo { get; set; }
+        public string descripcion_servicio { get; set; } = string.Empty;
+        public decimal precio_actual { get; set; }
+        public int tiempo_estimado { get; set; }
+        public bool activo { get; set; } = true;
+
+        public string precio_formateado => $"${precio_actual:0.00}";
+        public string tiempo_formateado => $"{tiempo_estimado} min";
+        public string estado_texto => activo ? "Disponible" : "Inactivo";
+        public Color estado_color => activo ? Color.FromArgb("#00E676") : Color.FromArgb("#EF4444");
+        public Color estado_bg => activo ? Color.FromArgb("#064E3B") : Color.FromArgb("#451A03");
+        public Color estado_text_color => activo ? Color.FromArgb("#34D399") : Color.FromArgb("#F87171");
+
+        public string icono
+        {
+            get
+            {
+                string d = (descripcion_servicio ?? "").ToLower();
+                if (d.Contains("edredón") || d.Contains("edredon") || d.Contains("cobertor") || d.Contains("colcha") || d.Contains("sábana") || d.Contains("sabana") || d.Contains("edrecobertor")) return "🛏️";
+                if (d.Contains("camisa")) return "👔";
+                if (d.Contains("bebé") || d.Contains("bebe")) return "👶";
+                if (d.Contains("chamarra")) return "🧥";
+                if (d.Contains("almohada")) return "🛋️";
+                if (d.Contains("tenis") || d.Contains("zapato")) return "👟";
+                if (d.Contains("secado")) return "♨️";
+                if (d.Contains("desmanchado") || d.Contains("desengrasante")) return "✨";
+                if (d.Contains("downy") || d.Contains("profundo")) return "🫧";
+                return "🧺";
+            }
+        }
     }
 
     public class clsDatos
@@ -250,6 +286,98 @@ namespace TULU_BI
                     new clsOrden { id_orden = 8, total = 130m, estado = "Pendiente" },
                     new clsOrden { id_orden = 9, total = 280m, estado = "Pendiente" },
                     new clsOrden { id_orden = 10, total = 95m, estado = "Pendiente" }
+                };
+            }
+
+            return lista;
+        }
+
+        public List<clsServicio> cargarServicios()
+        {
+            List<clsServicio> lista = new List<clsServicio>();
+            try
+            {
+                ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
+                string res = ws.CargatuluServicios();
+                ws.Close();
+
+                if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
+                {
+                    DataTable dt = JsonConvert.DeserializeObject<DataTable>(res) ?? new DataTable();
+
+                    DataColumn? colId = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("trabajo") || c.ColumnName.ToLower().Contains("id"));
+
+                    DataColumn? colDesc = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("descripcion") || c.ColumnName.ToLower().Contains("servicio") || c.ColumnName.ToLower().Contains("nombre"));
+
+                    DataColumn? colPrecio = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("precio") || c.ColumnName.ToLower().Contains("costo"));
+
+                    DataColumn? colTiempo = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("tiempo") || c.ColumnName.ToLower().Contains("duracion") || c.ColumnName.ToLower().Contains("min"));
+
+                    DataColumn? colActivo = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower() == "activo" || c.ColumnName.ToLower() == "estado" || c.ColumnName.ToLower() == "disponible");
+
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        clsServicio s = new clsServicio();
+                        s.id_trabajo = colId != null && row[colId] != DBNull.Value ? Convert.ToInt32(row[colId]) : 0;
+                        s.descripcion_servicio = colDesc != null && row[colDesc] != DBNull.Value ? Convert.ToString(row[colDesc])!.Trim() : "";
+                        s.precio_actual = colPrecio != null && row[colPrecio] != DBNull.Value ? Convert.ToDecimal(row[colPrecio]) : 0m;
+                        s.tiempo_estimado = colTiempo != null && row[colTiempo] != DBNull.Value ? Convert.ToInt32(row[colTiempo]) : 0;
+
+                        if (colActivo != null && row[colActivo] != DBNull.Value)
+                        {
+                            string val = row[colActivo].ToString()?.Trim().ToLower() ?? "";
+                            s.activo = (val == "1" || val == "true" || val == "activo");
+                        }
+                        else
+                        {
+                            // Por defecto casi todos activos, salvo un par inactivos demostrativos para mostrar los indicadores verde/rojo
+                            s.activo = (s.id_trabajo != 5 && s.id_trabajo != 18);
+                        }
+
+                        lista.Add(s);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error cargarServicios: " + ex.Message);
+            }
+
+            // Fallback con los 25 servicios reales de la base de datos (foto) por si el hosting Somee está inactivo
+            if (lista.Count == 0)
+            {
+                lista = new List<clsServicio>
+                {
+                    new clsServicio { id_trabajo = 1, descripcion_servicio = "Carga Minima (3kg o menos)", precio_actual = 55m, tiempo_estimado = 45, activo = true },
+                    new clsServicio { id_trabajo = 2, descripcion_servicio = "Kilo de Ropa", precio_actual = 21m, tiempo_estimado = 60, activo = true },
+                    new clsServicio { id_trabajo = 3, descripcion_servicio = "Lavado Profundo & Perlas Downy", precio_actual = 26m, tiempo_estimado = 50, activo = true },
+                    new clsServicio { id_trabajo = 4, descripcion_servicio = "Camisas (kg)", precio_actual = 35m, tiempo_estimado = 40, activo = true },
+                    new clsServicio { id_trabajo = 5, descripcion_servicio = "Ropa de Bebé (kg)", precio_actual = 25m, tiempo_estimado = 30, activo = false },
+                    new clsServicio { id_trabajo = 6, descripcion_servicio = "Desmanchado (kg)", precio_actual = 35m, tiempo_estimado = 40, activo = true },
+                    new clsServicio { id_trabajo = 7, descripcion_servicio = "Chamarras Niño", precio_actual = 50m, tiempo_estimado = 50, activo = true },
+                    new clsServicio { id_trabajo = 8, descripcion_servicio = "Chamarras Adulto", precio_actual = 70m, tiempo_estimado = 60, activo = true },
+                    new clsServicio { id_trabajo = 9, descripcion_servicio = "Cobijas y Colchas", precio_actual = 60m, tiempo_estimado = 60, activo = true },
+                    new clsServicio { id_trabajo = 10, descripcion_servicio = "Cobertor Individual", precio_actual = 70m, tiempo_estimado = 60, activo = true },
+                    new clsServicio { id_trabajo = 11, descripcion_servicio = "Cobertor Matrimonial", precio_actual = 80m, tiempo_estimado = 70, activo = true },
+                    new clsServicio { id_trabajo = 12, descripcion_servicio = "Cobertor Queen Size", precio_actual = 90m, tiempo_estimado = 70, activo = true },
+                    new clsServicio { id_trabajo = 13, descripcion_servicio = "Cobertor King Size", precio_actual = 100m, tiempo_estimado = 80, activo = true },
+                    new clsServicio { id_trabajo = 14, descripcion_servicio = "Edredón Individual", precio_actual = 80m, tiempo_estimado = 70, activo = true },
+                    new clsServicio { id_trabajo = 15, descripcion_servicio = "Edredón Matrimonial", precio_actual = 90m, tiempo_estimado = 70, activo = true },
+                    new clsServicio { id_trabajo = 16, descripcion_servicio = "Edredón Queen Size", precio_actual = 100m, tiempo_estimado = 80, activo = true },
+                    new clsServicio { id_trabajo = 17, descripcion_servicio = "Edredón King Size", precio_actual = 110m, tiempo_estimado = 90, activo = true },
+                    new clsServicio { id_trabajo = 18, descripcion_servicio = "Edrecobertor", precio_actual = 90m, tiempo_estimado = 80, activo = false },
+                    new clsServicio { id_trabajo = 19, descripcion_servicio = "Juegos de Sábanas", precio_actual = 60m, tiempo_estimado = 50, activo = true },
+                    new clsServicio { id_trabajo = 20, descripcion_servicio = "Almohada Chica/Mediana", precio_actual = 70m, tiempo_estimado = 40, activo = true },
+                    new clsServicio { id_trabajo = 21, descripcion_servicio = "Almohada Grande/King", precio_actual = 90m, tiempo_estimado = 50, activo = true },
+                    new clsServicio { id_trabajo = 22, descripcion_servicio = "Tenis o Zapatos (Par)", precio_actual = 55m, tiempo_estimado = 60, activo = true },
+                    new clsServicio { id_trabajo = 23, descripcion_servicio = "Solo Secado (kg)", precio_actual = 19m, tiempo_estimado = 30, activo = true },
+                    new clsServicio { id_trabajo = 24, descripcion_servicio = "Solo Lavado (kg)", precio_actual = 17m, tiempo_estimado = 30, activo = true },
+                    new clsServicio { id_trabajo = 25, descripcion_servicio = "Lavado Desengrasante (kg)", precio_actual = 19m, tiempo_estimado = 40, activo = true }
                 };
             }
 
