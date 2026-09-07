@@ -7,162 +7,193 @@
 
     <Grid RowDefinitions="*, Auto">
 
-        <!-- Contenido principal con scroll -->
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Spacing="20" Padding="20,20,20,30">
+            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
-                <!-- Barra Superior (Perfil, Título y Notificaciones) -->
-                <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,5,0,5">
-                    <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
-                        <Border StrokeShape="Ellipse" WidthRequest="42" HeightRequest="42" StrokeThickness="0">
-                            <Image Source="dotnet_bot.png" Aspect="AspectFill" />
-                        </Border>
-                        <Label Text="TULU BI" 
-                               TextColor="#00E676" 
-                               FontSize="20" 
-                               FontAttributes="Bold" 
-                               VerticalTextAlignment="Center" />
-                    </HorizontalStackLayout>
+                <!-- ─────────────────────────────────── -->
+                <!--   HEADER                           -->
+                <!-- ─────────────────────────────────── -->
+                <Border BackgroundColor="#0D1526" Padding="20,20,20,22" StrokeThickness="0">
+                    <VerticalStackLayout Spacing="12">
 
-                    <Border Grid.Column="2" 
-                            BackgroundColor="#131B2E" 
-                            StrokeShape="Ellipse" 
-                            WidthRequest="42" 
-                            HeightRequest="42" 
-                            StrokeThickness="0"
-                            HorizontalOptions="End" 
-                            VerticalOptions="Center">
-                        <Label Text="🔔" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <!-- Logo + Badge Página -->
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                                <Border BackgroundColor="#00E676" StrokeShape="RoundRectangle 8" WidthRequest="34" HeightRequest="34" StrokeThickness="0">
+                                    <Label Text="T" TextColor="#070A13" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <Label Text="TULU BI" TextColor="#00E676" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            </HorizontalStackLayout>
+                            <Border Grid.Column="2" BackgroundColor="#0F2A1A" StrokeShape="RoundRectangle 12" Padding="10,5" StrokeThickness="0" VerticalOptions="Center">
+                                <Label Text="⚙️ OPERACIONES" TextColor="#34D399" FontSize="11" FontAttributes="Bold" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Título -->
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Centro de Operaciones" TextColor="White" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="Seguimiento en tiempo real de órdenes y clientes" TextColor="#9CA3AF" FontSize="13" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ─────────────────────────────────── -->
+                <!--   KPI STRIP (3 tarjetas)           -->
+                <!-- ─────────────────────────────────── -->
+                <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10" Padding="16,16,16,0">
+
+                    <!-- KPI: Listas para entregar -->
+                    <Border Grid.Column="0" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#064E3B" Padding="10,12">
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="✅" FontSize="18" HorizontalOptions="Center" />
+                            <Label x:Name="lblKpiListas" Text="--" TextColor="#00E676" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="Listas" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
                     </Border>
+
+                    <!-- KPI: A domicilio -->
+                    <Border Grid.Column="1" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#1E3A5F" Padding="10,12">
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="🚚" FontSize="18" HorizontalOptions="Center" />
+                            <Label x:Name="lblKpiDomicilio" Text="--" TextColor="#60A5FA" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="Domicilio" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- KPI: Morosos -->
+                    <Border Grid.Column="2" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#3B1515" Padding="10,12">
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="⚠️" FontSize="18" HorizontalOptions="Center" />
+                            <Label x:Name="lblKpiMorosos" Text="--" TextColor="#F87171" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="Pendientes" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
                 </Grid>
 
-                <!-- Cabecera de la página -->
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Centro de Acción" 
-                           TextColor="White" 
-                           FontSize="22" 
-                           FontAttributes="Bold" />
-                    <Label Text="Gestión de protocolos operativos y resoluciones pendientes." 
-                           TextColor="#9CA3AF" 
-                           FontSize="14" />
-                </VerticalStackLayout>
-
-                <!-- Pestañas de Estado (Pendientes, Ejecutados, Archivados) -->
-                <VerticalStackLayout Spacing="0">
-                    <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="24" Margin="0,5,0,0">
-                        <VerticalStackLayout Grid.Column="0" Spacing="8">
-                            <Label Text="PENDIENTES (3)" TextColor="#00E676" FontSize="12" FontAttributes="Bold" />
-                            <BoxView HeightRequest="2" BackgroundColor="#00E676" />
-                        </VerticalStackLayout>
-                        <Label Grid.Column="1" Text="EJECUTADOS" TextColor="#9CA3AF" FontSize="12" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="2" Text="ARCHIVADOS" TextColor="#9CA3AF" FontSize="12" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                <!-- ─────────────────────────────────────── -->
+                <!--  FILTROS Y BÚSQUEDA                    -->
+                <!-- ─────────────────────────────────────── -->
+                <VerticalStackLayout Padding="16,20,16,0" Spacing="10">
+                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                        <Border Grid.Column="0" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="#1E293B" HeightRequest="45">
+                            <SearchBar x:Name="searchBar" Placeholder="Buscar cliente..." PlaceholderColor="#64748B" TextColor="White" CancelButtonColor="#00E676" TextChanged="OnSearchTextChanged" VerticalOptions="Center" />
+                        </Border>
+                        <Border Grid.Column="1" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="#1E293B" Padding="10,0" HeightRequest="45">
+                            <Picker x:Name="pickerFiltro" Title="Filtro" TextColor="White" TitleColor="#64748B" SelectedIndexChanged="OnFiltroChanged" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Picker.Items>
+                                    <x:String>Todas</x:String>
+                                    <x:String>Listas</x:String>
+                                    <x:String>Domicilio</x:String>
+                                    <x:String>Morosos</x:String>
+                                    <x:String>Productividad</x:String>
+                                </Picker.Items>
+                                <Picker.SelectedIndex>0</Picker.SelectedIndex>
+                            </Picker>
+                        </Border>
                     </Grid>
-                    <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,0,0,5" />
                 </VerticalStackLayout>
 
-                <!-- Tarjeta 1: Alerta Alta (Intervención de Cliente Moroso) -->
-                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="18" StrokeShape="RoundRectangle 16">
-                    <VerticalStackLayout Spacing="12">
-                        <!-- Cabecera de la tarjeta: Badge y ID -->
-                        <Grid ColumnDefinitions="*, Auto">
-                            <Border Grid.Column="0" BackgroundColor="#451A03" StrokeShape="RoundRectangle 8" Padding="10,4" StrokeThickness="0" HorizontalOptions="Start">
-                                <HorizontalStackLayout Spacing="6">
-                                    <Ellipse WidthRequest="6" HeightRequest="6" Fill="#F87171" VerticalOptions="Center" />
-                                    <Label Text="ALERTA ALTA" TextColor="#F87171" FontSize="10" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                </HorizontalStackLayout>
-                            </Border>
-                            <Label Grid.Column="1" Text="ID: TK-9482" TextColor="#9CA3AF" FontSize="12" VerticalTextAlignment="Center" />
-                        </Grid>
+                <!-- ─────────────────────────────────────── -->
+                <!--  SECCIÓN 1: ÓRDENES LISTAS PARA ENTREGAR -->
+                <!-- ─────────────────────────────────────── -->
+                <VerticalStackLayout x:Name="secListas" Padding="16,20,16,0" Spacing="10">
 
-                        <!-- Título y Descripción -->
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Intervención de Cliente Moroso" TextColor="White" FontSize="16" FontAttributes="Bold" />
-                            <Label Text="Factura vencida hace 45 días. Requiere contacto inmediato para reestructuración de pago o suspensión de servicio." TextColor="#9CA3AF" FontSize="12" LineBreakMode="WordWrap" />
-                        </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*, Auto">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                            <Border BackgroundColor="#064E3B" StrokeShape="Ellipse" WidthRequest="8" HeightRequest="8" StrokeThickness="0" VerticalOptions="Center" />
+                            <Label Text="Órdenes Listas para Entregar" TextColor="White" FontSize="15" FontAttributes="Bold" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label Grid.Column="1" x:Name="lblContListas" Text="" TextColor="#64748B" FontSize="11" VerticalTextAlignment="Center" />
+                    </Grid>
 
-                        <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,2" />
+                    <!-- Indicador de carga seccion 1 -->
+                    <ActivityIndicator x:Name="actListas" IsRunning="True" Color="#00E676" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" />
 
-                        <!-- Pie de tarjeta: Tiempo y Botón Gestionar (Resaltado en Verde) -->
-                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                            <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
-                                <Label Text="🕒" FontSize="12" VerticalTextAlignment="Center" />
-                                <Label Text="Hace 2 hrs" TextColor="#9CA3AF" FontSize="12" VerticalTextAlignment="Center" />
-                            </HorizontalStackLayout>
-                            <Border Grid.Column="1" BackgroundColor="#064E3B" StrokeShape="RoundRectangle 10" Padding="14,8" StrokeThickness="0">
-                                <Label Text="GESTIONAR" TextColor="#34D399" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Border>
-                        </Grid>
-                    </VerticalStackLayout>
-                </Border>
+                    <!-- Container dinámico de órdenes listas -->
+                    <VerticalStackLayout x:Name="containerListas" Spacing="10" />
 
-                <!-- Tarjeta 2: Bloqueo (Liberación de Anaquel) -->
-                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="18" StrokeShape="RoundRectangle 16">
-                    <VerticalStackLayout Spacing="12">
-                        <Grid ColumnDefinitions="*, Auto">
-                            <Border Grid.Column="0" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 8" Padding="10,4" StrokeThickness="0" HorizontalOptions="Start">
-                                <HorizontalStackLayout Spacing="6">
-                                    <Label Text="🔒" FontSize="10" VerticalTextAlignment="Center" />
-                                    <Label Text="BLOQUEO > 8 DÍAS" TextColor="#9CA3AF" FontSize="10" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                </HorizontalStackLayout>
-                            </Border>
-                            <Label Grid.Column="1" Text="ID: TK-9475" TextColor="#9CA3AF" FontSize="12" VerticalTextAlignment="Center" />
-                        </Grid>
+                    <!-- Sin datos -->
+                    <Border x:Name="panelSinListas" IsVisible="False" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 12" StrokeThickness="0" Padding="20,14">
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Label Text="✅" FontSize="16" VerticalOptions="Center" />
+                            <Label Text="Sin órdenes pendientes de entrega" TextColor="#64748B" FontSize="13" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
 
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Liberación de Anaquel" TextColor="White" FontSize="16" FontAttributes="Bold" />
-                            <Label Text="Prendas sin recoger en Anaquel B-42. Iniciar protocolo de donación/almacenamiento profundo según términos." TextColor="#9CA3AF" FontSize="12" LineBreakMode="WordWrap" />
-                        </VerticalStackLayout>
+                </VerticalStackLayout>
 
-                        <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,2" />
+                <!-- ─────────────────────────────────────── -->
+                <!--  SECCIÓN 2: ENTREGAS A DOMICILIO       -->
+                <!-- ─────────────────────────────────────── -->
+                <VerticalStackLayout x:Name="secDomicilio" Padding="16,20,16,0" Spacing="10">
 
-                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                            <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
-                                <Label Text="🕒" FontSize="12" VerticalTextAlignment="Center" />
-                                <Label Text="Hace 1 día" TextColor="#9CA3AF" FontSize="12" VerticalTextAlignment="Center" />
-                            </HorizontalStackLayout>
-                            <Border Grid.Column="1" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 10" Padding="14,8" StrokeThickness="0">
-                                <Label Text="GESTIONAR" TextColor="#9CA3AF" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Border>
-                        </Grid>
-                    </VerticalStackLayout>
-                </Border>
+                    <Grid ColumnDefinitions="*, Auto">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                            <Border BackgroundColor="#3B82F6" StrokeShape="Ellipse" WidthRequest="8" HeightRequest="8" StrokeThickness="0" VerticalOptions="Center" />
+                            <Label Text="🚚  Entregas a Domicilio" TextColor="White" FontSize="15" FontAttributes="Bold" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label Grid.Column="1" x:Name="lblContDomicilio" Text="" TextColor="#64748B" FontSize="11" VerticalTextAlignment="Center" />
+                    </Grid>
 
-                <!-- Tarjeta 3: Riesgo de Fuga (Retención de Clientes) -->
-                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="18" StrokeShape="RoundRectangle 16">
-                    <VerticalStackLayout Spacing="12">
-                        <Grid ColumnDefinitions="*, Auto">
-                            <Border Grid.Column="0" BackgroundColor="#064E3B" StrokeShape="RoundRectangle 8" Padding="10,4" StrokeThickness="0" HorizontalOptions="Start">
-                                <HorizontalStackLayout Spacing="6">
-                                    <Label Text="📉" FontSize="10" VerticalTextAlignment="Center" />
-                                    <Label Text="RIESGO DE FUGA" TextColor="#34D399" FontSize="10" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                </HorizontalStackLayout>
-                            </Border>
-                            <Label Grid.Column="1" Text="ID: TK-9460" TextColor="#9CA3AF" FontSize="12" VerticalTextAlignment="Center" />
-                        </Grid>
+                    <VerticalStackLayout x:Name="containerDomicilio" Spacing="10" />
 
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Retención de Clientes" TextColor="White" FontSize="16" FontAttributes="Bold" />
-                            <Label Text="Cliente VIP (ID: 8839) muestra caída del 60% en frecuencia de uso en el último trimestre. Aplicar oferta de reactivación." TextColor="#9CA3AF" FontSize="12" LineBreakMode="WordWrap" />
-                        </VerticalStackLayout>
+                    <Border x:Name="panelSinDomicilio" IsVisible="False" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 12" StrokeThickness="0" Padding="20,14">
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Label Text="🚚" FontSize="16" VerticalOptions="Center" />
+                            <Label Text="Sin entregas a domicilio programadas" TextColor="#64748B" FontSize="13" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
 
-                        <BoxView HeightRequest="1" BackgroundColor="#1F2937" Margin="0,2" />
+                </VerticalStackLayout>
 
-                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                            <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
-                                <Label Text="🕒" FontSize="12" VerticalTextAlignment="Center" />
-                                <Label Text="Hace 2 días" TextColor="#9CA3AF" FontSize="12" VerticalTextAlignment="Center" />
-                            </HorizontalStackLayout>
-                            <Border Grid.Column="1" BackgroundColor="#1F2937" StrokeShape="RoundRectangle 10" Padding="14,8" StrokeThickness="0">
-                                <Label Text="GESTIONAR" TextColor="#9CA3AF" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Border>
-                        </Grid>
-                    </VerticalStackLayout>
-                </Border>
+                <!-- ─────────────────────────────────────── -->
+                <!--  SECCIÓN 3: CLIENTES CON SALDO PENDIENTE (MOROSOS) -->
+                <!-- ─────────────────────────────────────── -->
+                <VerticalStackLayout x:Name="secMorosos" Padding="16,20,16,0" Spacing="10">
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                            <Border BackgroundColor="#EF4444" StrokeShape="Ellipse" WidthRequest="8" HeightRequest="8" StrokeThickness="0" VerticalOptions="Center" />
+                            <Label Text="⚠️  Clientes con Saldo Pendiente" TextColor="White" FontSize="15" FontAttributes="Bold" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label Grid.Column="1" x:Name="lblContMorosos" Text="" TextColor="#F87171" FontSize="11" VerticalTextAlignment="Center" />
+                    </Grid>
+
+                    <VerticalStackLayout x:Name="containerMorosos" Spacing="10" />
+
+                    <Border x:Name="panelSinMorosos" IsVisible="False" BackgroundColor="#131B2E" StrokeShape="RoundRectangle 12" StrokeThickness="0" Padding="20,14">
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Label Text="🎉" FontSize="16" VerticalOptions="Center" />
+                            <Label Text="¡Sin clientes con saldo pendiente!" TextColor="#34D399" FontSize="13" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- ─────────────────────────────────────── -->
+                <!--  SECCIÓN 4: PRODUCTIVIDAD POR EMPLEADO -->
+                <!-- ─────────────────────────────────────── -->
+                <VerticalStackLayout x:Name="secProductividad" Padding="16,20,16,0" Spacing="10">
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Border BackgroundColor="#A78BFA" StrokeShape="Ellipse" WidthRequest="8" HeightRequest="8" StrokeThickness="0" VerticalOptions="Center" />
+                        <Label Text="👤  Órdenes por Empleado (Turno)" TextColor="White" FontSize="15" FontAttributes="Bold" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <Border BackgroundColor="#131B2E" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#1E293B" Padding="16,12">
+                        <VerticalStackLayout x:Name="containerProductividad" Spacing="12" />
+                    </Border>
+
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Barra de Navegación Inferior (Alertas Activo) -->
+        <!-- ══════════════════════════════════════════ -->
+        <!--    BARRA DE NAVEGACIÓN INFERIOR           -->
+        <!-- ══════════════════════════════════════════ -->
         <Border Grid.Row="1" BackgroundColor="#131B2E" StrokeThickness="0" Padding="10,12" StrokeShape="RoundRectangle 24,24,0,0">
             <Grid ColumnDefinitions="*, *, *, *">
 
@@ -184,15 +215,12 @@
                     <Label Text="SERVICIOS" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
-                <!-- Alertas (Activo en esta página) -->
+                <!-- Alertas (Activo) -->
                 <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="Center">
-                    <VerticalStackLayout.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnAlertasTapped"/>
-                    </VerticalStackLayout.GestureRecognizers>
                     <Border BackgroundColor="#064E3B" StrokeShape="RoundRectangle 10" WidthRequest="40" HeightRequest="26" StrokeThickness="0" HorizontalOptions="Center">
-                        <Label Text="🔔" TextColor="#00E676" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Label Text="⚙️" TextColor="#00E676" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
-                    <Label Text="ALERTAS" TextColor="#00E676" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Label Text="OPERAC." TextColor="#00E676" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
                 <!-- Analítica -->

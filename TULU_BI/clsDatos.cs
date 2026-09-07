@@ -33,8 +33,22 @@ namespace TULU_BI
     {
         public int id_orden { get; set; }
         public int id_cliente { get; set; }
+        public int id_empleado { get; set; }
         public decimal total { get; set; }
         public string estado { get; set; } = "Pagado";
+        public DateTime fecha_ingreso { get; set; }
+        public DateTime fecha_listo { get; set; }
+        public DateTime fecha_entrega_a { get; set; }
+        public int tipo_entrega { get; set; } = 1; // 1=Recoger en tienda, 2=Domicilio
+
+        // Helpers para UI
+        public bool es_domicilio => tipo_entrega == 2;
+        public bool es_pendiente => estado?.ToLower().Contains("pend") == true;
+        public string tipo_entrega_texto => tipo_entrega == 2 ? "Domicilio" : "Tienda";
+        public string tipo_entrega_icono => tipo_entrega == 2 ? "🚚" : "🏪";
+        public string fecha_ingreso_corta => fecha_ingreso == DateTime.MinValue ? "—" : fecha_ingreso.ToString("dd/MM HH:mm");
+        public string fecha_listo_corta => fecha_listo == DateTime.MinValue ? "—" : fecha_listo.ToString("dd/MM HH:mm");
+        public string fecha_entrega_corta => fecha_entrega_a == DateTime.MinValue ? "—" : fecha_entrega_a.ToString("dd/MM HH:mm");
     }
 
     public class clsServicio
@@ -277,7 +291,7 @@ namespace TULU_BI
                     DataColumn? colEstado = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
                     {
                         string n = c.ColumnName.Trim().ToLower();
-                        return n.Contains("estado") || n.Contains("estatus") || n.Contains("pago") || n.Contains("status");
+                        return n.Contains("estado") || n.Contains("estatus") || n == "estado_pago" || n.Contains("status");
                     });
 
                     DataColumn? colTotal = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
@@ -289,16 +303,43 @@ namespace TULU_BI
                     DataColumn? colCliente = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
                         c.ColumnName.Trim().ToLower().Contains("cliente"));
 
+                    DataColumn? colEmpleado = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.Trim().ToLower().Contains("empleado"));
+
+                    DataColumn? colFechaIngreso = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.Trim().ToLower().Contains("ingreso"));
+
+                    DataColumn? colFechaListo = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.Trim().ToLower() == "fecha_listo" || c.ColumnName.Trim().ToLower().Contains("listo"));
+
+                    DataColumn? colFechaEntrega = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.Trim().ToLower().Contains("entrega"));
+
+                    DataColumn? colTipoEntrega = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.Trim().ToLower().Contains("tipo"));
+
                     foreach (DataRow row in dt.Rows)
                     {
                         clsOrden o = new clsOrden();
-                        o.id_orden = colId != null && row[colId] != DBNull.Value ? Convert.ToInt32(row[colId]) : 0;
-                        o.id_cliente = colCliente != null && row[colCliente] != DBNull.Value ? Convert.ToInt32(row[colCliente]) : 0;
-                        o.total = colTotal != null && row[colTotal] != DBNull.Value ? Convert.ToDecimal(row[colTotal]) : 0m;
+                        o.id_orden    = colId       != null && row[colId]       != DBNull.Value ? Convert.ToInt32(row[colId])   : 0;
+                        o.id_cliente  = colCliente  != null && row[colCliente]  != DBNull.Value ? Convert.ToInt32(row[colCliente]) : 0;
+                        o.id_empleado = colEmpleado != null && row[colEmpleado] != DBNull.Value ? Convert.ToInt32(row[colEmpleado]) : 0;
+                        o.total       = colTotal    != null && row[colTotal]    != DBNull.Value ? Convert.ToDecimal(row[colTotal]) : 0m;
+                        o.tipo_entrega = colTipoEntrega != null && row[colTipoEntrega] != DBNull.Value ? Convert.ToInt32(row[colTipoEntrega]) : 1;
+
+                        if (colFechaIngreso != null && row[colFechaIngreso] != DBNull.Value)
+                            DateTime.TryParse(row[colFechaIngreso].ToString(), out var fi) ; // just parse
+                        if (colFechaIngreso != null && row[colFechaIngreso] != DBNull.Value && DateTime.TryParse(row[colFechaIngreso].ToString(), out var fechaIng))
+                            o.fecha_ingreso = fechaIng;
+                        if (colFechaListo != null && row[colFechaListo] != DBNull.Value && DateTime.TryParse(row[colFechaListo].ToString(), out var fechaList))
+                            o.fecha_listo = fechaList;
+                        if (colFechaEntrega != null && row[colFechaEntrega] != DBNull.Value && DateTime.TryParse(row[colFechaEntrega].ToString(), out var fechaEnt))
+                            o.fecha_entrega_a = fechaEnt;
 
                         string rawEstado = colEstado != null && row[colEstado] != DBNull.Value ? row[colEstado].ToString()?.Trim() ?? "" : "";
                         if (rawEstado.IndexOf("pend", StringComparison.OrdinalIgnoreCase) >= 0 || rawEstado.IndexOf("debe", StringComparison.OrdinalIgnoreCase) >= 0)
                             o.estado = "Pendiente";
+
                         else
                             o.estado = "Pagado";
 
@@ -314,18 +355,19 @@ namespace TULU_BI
             // Fallback con datos proporcionales si la conexión remota está inactiva
             if (lista.Count == 0)
             {
+                // Fallback exacto con los datos reales de la tabla ORDENES (capturas de pantalla)
                 lista = new List<clsOrden>
                 {
-                    new clsOrden { id_orden = 1, total = 250m, estado = "Pagado" },
-                    new clsOrden { id_orden = 2, total = 180m, estado = "Pagado" },
-                    new clsOrden { id_orden = 3, total = 320m, estado = "Pagado" },
-                    new clsOrden { id_orden = 4, total = 150m, estado = "Pagado" },
-                    new clsOrden { id_orden = 5, total = 420m, estado = "Pagado" },
-                    new clsOrden { id_orden = 6, total = 210m, estado = "Pagado" },
-                    new clsOrden { id_orden = 7, total = 190m, estado = "Pagado" },
-                    new clsOrden { id_orden = 8, total = 130m, estado = "Pendiente" },
-                    new clsOrden { id_orden = 9, total = 280m, estado = "Pendiente" },
-                    new clsOrden { id_orden = 10, total = 95m, estado = "Pendiente" }
+                    new clsOrden { id_orden=1,  id_cliente=62, id_empleado=3, total=270m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,8,35,0),  fecha_listo=new DateTime(2026,3,2,10,0,0),  fecha_entrega_a=new DateTime(2026,3,2,12,0,0)  },
+                    new clsOrden { id_orden=2,  id_cliente=60, id_empleado=4, total=289m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,8,52,0),  fecha_listo=new DateTime(2026,3,2,11,30,0), fecha_entrega_a=new DateTime(2026,3,2,15,0,0)  },
+                    new clsOrden { id_orden=3,  id_cliente=49, id_empleado=3, total=230m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,9,25,0),  fecha_listo=new DateTime(2026,3,2,12,0,0),  fecha_entrega_a=new DateTime(2026,3,2,14,0,0)  },
+                    new clsOrden { id_orden=4,  id_cliente=30, id_empleado=2, total=252m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,9,30,0),  fecha_listo=new DateTime(2026,3,2,13,0,0),  fecha_entrega_a=new DateTime(2026,3,2,16,0,0)  },
+                    new clsOrden { id_orden=5,  id_cliente=76, id_empleado=5, total=175m, estado="Pagado",    tipo_entrega=2, fecha_ingreso=new DateTime(2026,3,1,10,14,0), fecha_listo=new DateTime(2026,3,2,14,0,0),  fecha_entrega_a=new DateTime(2026,3,3,9,0,0)   },
+                    new clsOrden { id_orden=6,  id_cliente=17, id_empleado=6, total=114m, estado="Pagado",    tipo_entrega=2, fecha_ingreso=new DateTime(2026,3,1,10,27,0), fecha_listo=new DateTime(2026,3,2,15,0,0),  fecha_entrega_a=new DateTime(2026,3,3,11,0,0)  },
+                    new clsOrden { id_orden=7,  id_cliente=34, id_empleado=4, total=190m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,11,8,0),  fecha_listo=new DateTime(2026,3,2,16,0,0),  fecha_entrega_a=new DateTime(2026,3,2,18,0,0)  },
+                    new clsOrden { id_orden=8,  id_cliente=77, id_empleado=6, total=130m, estado="Pagado",    tipo_entrega=2, fecha_ingreso=new DateTime(2026,3,1,11,43,0), fecha_listo=new DateTime(2026,3,3,9,0,0),   fecha_entrega_a=new DateTime(2026,3,3,13,0,0)  },
+                    new clsOrden { id_orden=9,  id_cliente=36, id_empleado=1, total=280m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,12,1,0),  fecha_listo=new DateTime(2026,3,3,10,0,0),  fecha_entrega_a=new DateTime(2026,3,3,12,0,0)  },
+                    new clsOrden { id_orden=10, id_cliente=48, id_empleado=5, total=95m,  estado="Pendiente", tipo_entrega=2, fecha_ingreso=new DateTime(2026,3,1,12,32,0), fecha_listo=new DateTime(2026,3,3,11,0,0),  fecha_entrega_a=new DateTime(2026,3,4,10,0,0)  },
                 };
             }
 

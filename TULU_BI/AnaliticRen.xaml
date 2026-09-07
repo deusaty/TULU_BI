@@ -250,13 +250,13 @@
                     <Label Text="SERVICIOS" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
-                <!-- Alertas -->
+                <!-- Operaciones -->
                 <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnAlertasTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
-                    <Label Text="🔔" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="ALERTAS" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="⚙️" FontSize="16" HorizontalOptions="Center" />
+                    <Label Text="OPERAC." TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
                 <!-- Analítica (Activo en esta página) -->
