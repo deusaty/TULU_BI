@@ -71,6 +71,46 @@ namespace TULU_BI
         }
     }
 
+    public class clsEmpleado
+    {
+        public int id_empleado { get; set; }
+        public string nombre { get; set; } = string.Empty;
+        public string rol { get; set; } = string.Empty;
+
+        public string iniciales
+        {
+            get
+            {
+                var partes = (nombre ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (partes.Length >= 2) return $"{partes[0][0]}{partes[1][0]}".ToUpper();
+                if (partes.Length == 1) return partes[0][..Math.Min(2, partes[0].Length)].ToUpper();
+                return "?";
+            }
+        }
+
+        public string nombre_corto
+        {
+            get
+            {
+                // Devuelve solo el primer nombre + primer apellido
+                var partes = (nombre ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (partes.Length >= 2) return $"{partes[0]} {partes[1]}";
+                return nombre ?? "";
+            }
+        }
+
+        public string emoji_rol
+        {
+            get => rol?.ToLower() switch
+            {
+                var r when r != null && r.Contains("recepc") => "🗂️",
+                var r when r != null && r.Contains("oper") => "🧺",
+                var r when r != null && r.Contains("repart") => "🚚",
+                _ => "👤"
+            };
+        }
+    }
+
     public class clsDatos
     {
         public List<clsClientes> cargarClientes()
@@ -286,6 +326,58 @@ namespace TULU_BI
                     new clsOrden { id_orden = 8, total = 130m, estado = "Pendiente" },
                     new clsOrden { id_orden = 9, total = 280m, estado = "Pendiente" },
                     new clsOrden { id_orden = 10, total = 95m, estado = "Pendiente" }
+                };
+            }
+
+            return lista;
+        }
+
+        public List<clsEmpleado> cargarEmpleados()
+        {
+            List<clsEmpleado> lista = new List<clsEmpleado>();
+            try
+            {
+                ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
+                string res = ws.CargaEMPLEADOS();
+                ws.Close();
+
+                if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
+                {
+                    DataTable dt = JsonConvert.DeserializeObject<DataTable>(res) ?? new DataTable();
+
+                    DataColumn? colId = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("id"));
+                    DataColumn? colNombre = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("nombre") || c.ColumnName.ToLower().Contains("name"));
+                    DataColumn? colRol = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
+                        c.ColumnName.ToLower().Contains("rol") || c.ColumnName.ToLower().Contains("cargo") || c.ColumnName.ToLower().Contains("puesto"));
+
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        clsEmpleado e = new clsEmpleado();
+                        e.id_empleado = colId != null && row[colId] != DBNull.Value ? Convert.ToInt32(row[colId]) : 0;
+                        e.nombre = colNombre != null && row[colNombre] != DBNull.Value ? Convert.ToString(row[colNombre])?.Trim() ?? "" : "";
+                        e.rol = colRol != null && row[colRol] != DBNull.Value ? Convert.ToString(row[colRol])?.Trim() ?? "" : "";
+                        lista.Add(e);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error cargarEmpleados: " + ex.Message);
+            }
+
+            // Fallback con los 6 empleados reales de la base de datos (foto)
+            if (lista.Count == 0)
+            {
+                lista = new List<clsEmpleado>
+                {
+                    new clsEmpleado { id_empleado = 1, nombre = "Elizabeth Pamela Ortiz", rol = "Recepcionista" },
+                    new clsEmpleado { id_empleado = 2, nombre = "Alejandra Sierra Romo", rol = "Recepcionista" },
+                    new clsEmpleado { id_empleado = 3, nombre = "Pilar Chavez Rodriguez", rol = "Operaria de Lavandería" },
+                    new clsEmpleado { id_empleado = 4, nombre = "Rosa Chavez Rodriguez", rol = "Operaria de Lavandería" },
+                    new clsEmpleado { id_empleado = 5, nombre = "Gustavo Chavez Perez", rol = "Repartidor" },
+                    new clsEmpleado { id_empleado = 6, nombre = "Joel Romero Cruz", rol = "Repartidor" },
                 };
             }
 
