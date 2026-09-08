@@ -10,6 +10,8 @@ namespace TULU_BI;
 public partial class GesInv : ContentPage
 {
     private List<clsServicio> _todosLosServicios = new();
+    private List<clsClientes> _clientes = new();
+    private clsServicio _servicioSeleccionado;
     private string _filtroEstado = "todos"; // "todos", "activos", "inactivos"
     private string _textoBusqueda = "";
 
@@ -33,11 +35,14 @@ public partial class GesInv : ContentPage
             clsDatos datos = new clsDatos();
             // Ejecutar en hilo secundario para evitar congelar la interfaz
             List<clsServicio> lista = await Task.Run(() => datos.cargarServicios());
+            List<clsClientes> listaClientes = await Task.Run(() => datos.cargarClientes());
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 panelCargando.IsVisible = false;
                 _todosLosServicios = lista ?? new List<clsServicio>();
+                _clientes = listaClientes ?? new List<clsClientes>();
+                pickerCliente.ItemsSource = _clientes;
 
                 // Actualizar contadores en las tarjetas KPI
                 int total = _todosLosServicios.Count;
@@ -150,10 +155,78 @@ public partial class GesInv : ContentPage
         }
     }
 
-    // Navegación Inferior
+    // ── MODAL DE VENTA ───────────────────────────────────────────────────
+    private void OnVenderTapped(object sender, EventArgs e)
+    {
+        if (sender is Border border && border.BindingContext is clsServicio servicio)
+        {
+            if (!servicio.activo)
+            {
+                DisplayAlert("Servicio Inactivo", "No puedes registrar una venta de un servicio inactivo.", "OK");
+                return;
+            }
+
+            _servicioSeleccionado = servicio;
+            lblModalServicio.Text = servicio.descripcion_servicio;
+            lblModalTiempo.Text = servicio.tiempo_formateado;
+            lblModalTotal.Text = servicio.precio_formateado;
+            pickerCliente.SelectedIndex = -1;
+            
+            modalRegistro.IsVisible = true;
+        }
+    }
+
+    private void OnCerrarModalTapped(object sender, EventArgs e)
+    {
+        modalRegistro.IsVisible = false;
+        _servicioSeleccionado = null;
+    }
+
+    private async void OnConfirmarVentaClicked(object sender, EventArgs e)
+    {
+        if (_servicioSeleccionado == null) return;
+        
+        var clienteSelec = pickerCliente.SelectedItem as clsClientes;
+        if (clienteSelec == null)
+        {
+            await DisplayAlert("Falta Cliente", "Por favor selecciona un cliente de la lista.", "OK");
+            return;
+        }
+
+        btnConfirmarVenta.IsEnabled = false;
+        btnConfirmarVenta.Text = "Procesando...";
+
+        try
+        {
+            clsDatos datos = new clsDatos();
+            string resultado = await Task.Run(() => datos.registrarNuevaOperacion(clienteSelec.id, _servicioSeleccionado.id_trabajo, _servicioSeleccionado.precio_actual));
+            
+            if (resultado == "Exito")
+            {
+                await DisplayAlert("Éxito", $"Venta de {_servicioSeleccionado.descripcion_servicio} registrada para {clienteSelec.nombre}.", "OK");
+                modalRegistro.IsVisible = false;
+            }
+            else
+            {
+                await DisplayAlert("Error de SQL/WCF", resultado, "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Excepción", ex.Message, "OK");
+        }
+        finally
+        {
+            btnConfirmarVenta.IsEnabled = true;
+            btnConfirmarVenta.Text = "Confirmar Venta";
+            _servicioSeleccionado = null;
+        }
+    }
+
+    // ── NAVEGACIÓN ────────────────────────────────────────────────────────
     private async void OnDashboardTapped(object sender, EventArgs e)
     {
-        await Navigation.PopAsync();
+        await Navigation.PopToRootAsync();
     }
 
     private async void OnAlertasTapped(object sender, EventArgs e)

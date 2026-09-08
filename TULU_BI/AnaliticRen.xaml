@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="TULU_BI.AnaliticRen"
-             BackgroundColor="#070A13"
+             BackgroundColor="#FFFFFF"
              Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="*, Auto">
@@ -14,58 +14,62 @@
 
                 <!-- Barra Superior -->
                 <Grid Margin="0,5,0,5">
-                    <Label Text="TULU BI" 
-                           TextColor="#00E676" 
-                           FontSize="20" 
-                           FontAttributes="Bold" 
-                           VerticalTextAlignment="Center" />
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Border StrokeShape="RoundRectangle 20" WidthRequest="40" HeightRequest="40" StrokeThickness="0">
+                            <Image Source="logo_tulu.png" Aspect="AspectFill" />
+                        </Border>
+                        <Label Text="TULU BI" 
+                               TextColor="#0277BD" 
+                               FontSize="20" 
+                               FontAttributes="Bold" 
+                               VerticalTextAlignment="Center" />
+                    </HorizontalStackLayout>
                 </Grid>
 
                 <!-- Cabecera de la página -->
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Analítica de Rendimiento" 
-                           TextColor="White" 
+                           TextColor="#0F172A" 
                            FontSize="22" 
                            FontAttributes="Bold" />
                     <Label Text="Métricas operativas en tiempo real e inteligencia predictiva para instalaciones de lavandería de alto volumen." 
-                           TextColor="#9CA3AF" 
+                           TextColor="#475569" 
                            FontSize="13" 
                            LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
 
                 <!-- Tarjeta 1: Total de Clientes (KPI) -->
-                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                <Border BackgroundColor="#F8FAFC" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
                     <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
-                        <Label Text="TOTAL DE CLIENTES REGISTRADOS" TextColor="#9CA3AF" FontSize="11" FontAttributes="Bold" HorizontalTextAlignment="Center" />
-                        <Label x:Name="lblTotalClientes" Text="Cargando..." TextColor="White" FontSize="36" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Text="TOTAL DE CLIENTES REGISTRADOS" TextColor="#475569" FontSize="11" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label x:Name="lblTotalClientes" Text="Cargando..." TextColor="#0F172A" FontSize="36" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                     </VerticalStackLayout>
                 </Border>
 
                 <!-- Tarjeta 2: Usuarios por Método de Pago (Efectivo vs Tarjeta vs Transferencia) -->
-                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                <Border BackgroundColor="#F8FAFC" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
                     <VerticalStackLayout Spacing="16">
 
                         <!-- Header: Título limpio y Badge de Ventas -->
                         <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
                             <Label Grid.Column="0" 
                                    Text="USUARIOS POR MÉTODO DE PAGO" 
-                                   TextColor="#9CA3AF" 
+                                   TextColor="#475569" 
                                    FontSize="12" 
                                    FontAttributes="Bold" 
                                    VerticalTextAlignment="Center" />
 
                             <!-- Badge de total de ventas -->
                             <Border Grid.Column="1" 
-                                    BackgroundColor="#0B1324" 
+                                    BackgroundColor="#E1F5FE" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="10,4" 
-                                    StrokeThickness="1" 
-                                    Stroke="#1E293B">
+                                    StrokeThickness="0">
                                 <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                     <Label Text="🏷️" FontSize="11" VerticalOptions="Center" />
                                     <Label x:Name="lblTotalVentasAnalizadas" 
                                            Text="0 ventas" 
-                                           TextColor="#E2E8F0" 
+                                           TextColor="#0F172A" 
                                            FontSize="11" 
                                            FontAttributes="Bold" 
                                            VerticalOptions="Center" />
@@ -83,59 +87,59 @@
 
                             <!-- Bloque Efectivo -->
                             <Border Grid.Column="0" 
-                                    BackgroundColor="#0B1526" 
+                                    BackgroundColor="#FFFFFF" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="10,12" 
                                     StrokeThickness="1" 
-                                    Stroke="#132E2D">
+                                    Stroke="#8BC34A">
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
                                     <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
-                                        <BoxView Color="#00E676" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
-                                        <Label Text="EFECTIVO" TextColor="#9CA3AF" FontSize="9" FontAttributes="Bold" />
+                                        <BoxView Color="#8BC34A" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
+                                        <Label Text="EFECTIVO" TextColor="#475569" FontSize="9" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
-                                    <Label x:Name="lblUsuariosEfectivo" Text="--" TextColor="White" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
+                                    <Label x:Name="lblUsuariosEfectivo" Text="--" TextColor="#0F172A" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
                                     <Label Text="usuarios" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" Margin="0,-3,0,4" />
-                                    <Border BackgroundColor="#06281E" StrokeShape="RoundRectangle 8" Padding="6,3" StrokeThickness="0" HorizontalOptions="Center">
-                                        <Label x:Name="lblVentasEfectivo" Text="0 ventas" TextColor="#00E676" FontSize="10" FontAttributes="Bold" />
+                                    <Border BackgroundColor="#E8F5E9" StrokeShape="RoundRectangle 8" Padding="6,3" StrokeThickness="0" HorizontalOptions="Center">
+                                        <Label x:Name="lblVentasEfectivo" Text="0 ventas" TextColor="#8BC34A" FontSize="10" FontAttributes="Bold" />
                                     </Border>
                                 </VerticalStackLayout>
                             </Border>
 
                             <!-- Bloque Tarjeta -->
                             <Border Grid.Column="1" 
-                                    BackgroundColor="#0B1526" 
+                                    BackgroundColor="#FFFFFF" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="10,12" 
                                     StrokeThickness="1" 
-                                    Stroke="#172745">
+                                    Stroke="#29B6F6">
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
                                     <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
-                                        <BoxView Color="#3B82F6" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
-                                        <Label Text="TARJETA" TextColor="#9CA3AF" FontSize="9" FontAttributes="Bold" />
+                                        <BoxView Color="#29B6F6" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
+                                        <Label Text="TARJETA" TextColor="#475569" FontSize="9" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
-                                    <Label x:Name="lblUsuariosTarjeta" Text="--" TextColor="White" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
+                                    <Label x:Name="lblUsuariosTarjeta" Text="--" TextColor="#0F172A" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
                                     <Label Text="usuarios" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" Margin="0,-3,0,4" />
-                                    <Border BackgroundColor="#0E2347" StrokeShape="RoundRectangle 8" Padding="6,3" StrokeThickness="0" HorizontalOptions="Center">
-                                        <Label x:Name="lblVentasTarjeta" Text="0 ventas" TextColor="#3B82F6" FontSize="10" FontAttributes="Bold" />
+                                    <Border BackgroundColor="#E1F5FE" StrokeShape="RoundRectangle 8" Padding="6,3" StrokeThickness="0" HorizontalOptions="Center">
+                                        <Label x:Name="lblVentasTarjeta" Text="0 ventas" TextColor="#0277BD" FontSize="10" FontAttributes="Bold" />
                                     </Border>
                                 </VerticalStackLayout>
                             </Border>
 
                             <!-- Bloque Transferencia -->
                             <Border Grid.Column="2" 
-                                    BackgroundColor="#0B1526" 
+                                    BackgroundColor="#FFFFFF" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="10,12" 
                                     StrokeThickness="1" 
-                                    Stroke="#2D1A45">
+                                    Stroke="#A855F7">
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
                                     <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
                                         <BoxView Color="#A855F7" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
-                                        <Label Text="TRANSF." TextColor="#9CA3AF" FontSize="9" FontAttributes="Bold" />
+                                        <Label Text="TRANSF." TextColor="#475569" FontSize="9" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
-                                    <Label x:Name="lblUsuariosTransferencia" Text="--" TextColor="White" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
+                                    <Label x:Name="lblUsuariosTransferencia" Text="--" TextColor="#0F172A" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
                                     <Label Text="usuarios" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" Margin="0,-3,0,4" />
-                                    <Border BackgroundColor="#241238" StrokeShape="RoundRectangle 8" Padding="6,3" StrokeThickness="0" HorizontalOptions="Center">
+                                    <Border BackgroundColor="#F3E8FF" StrokeShape="RoundRectangle 8" Padding="6,3" StrokeThickness="0" HorizontalOptions="Center">
                                         <Label x:Name="lblVentasTransferencia" Text="0 ventas" TextColor="#A855F7" FontSize="10" FontAttributes="Bold" />
                                     </Border>
                                 </VerticalStackLayout>
@@ -147,30 +151,29 @@
                 </Border>
 
                 <!-- Tarjeta 3: Estado de Pagos (Pagados vs Pendientes) - Gráfica de Barras -->
-                <Border BackgroundColor="#131B2E" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                <Border BackgroundColor="#F8FAFC" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
                     <VerticalStackLayout Spacing="16">
 
                         <!-- Header -->
                         <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
                             <Label Grid.Column="0" 
                                    Text="ESTADO DE PAGOS: PAGADOS VS PENDIENTES" 
-                                   TextColor="#9CA3AF" 
+                                   TextColor="#475569" 
                                    FontSize="12" 
                                    FontAttributes="Bold" 
                                    VerticalTextAlignment="Center" />
 
                             <!-- Badge total pedidos/órdenes -->
                             <Border Grid.Column="1" 
-                                    BackgroundColor="#0B1324" 
+                                    BackgroundColor="#F1F5F9" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="10,4" 
-                                    StrokeThickness="1" 
-                                    Stroke="#1E293B">
+                                    StrokeThickness="0">
                                 <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                     <Label Text="📋" FontSize="11" VerticalOptions="Center" />
                                     <Label x:Name="lblTotalOrdenes" 
                                            Text="0 órdenes" 
-                                           TextColor="#E2E8F0" 
+                                           TextColor="#0F172A" 
                                            FontSize="11" 
                                            FontAttributes="Bold" 
                                            VerticalOptions="Center" />
@@ -188,34 +191,34 @@
 
                             <!-- Bloque Pagados -->
                             <Border Grid.Column="0" 
-                                    BackgroundColor="#0B1526" 
+                                    BackgroundColor="#FFFFFF" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="12,10" 
                                     StrokeThickness="1" 
-                                    Stroke="#132E2D">
+                                    Stroke="#8BC34A">
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
                                     <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
-                                        <BoxView Color="#00E676" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
-                                        <Label Text="PAGADOS" TextColor="#9CA3AF" FontSize="10" FontAttributes="Bold" />
+                                        <BoxView Color="#8BC34A" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
+                                        <Label Text="PAGADOS" TextColor="#475569" FontSize="10" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
-                                    <Label x:Name="lblPagosCompletados" Text="0" TextColor="White" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
+                                    <Label x:Name="lblPagosCompletados" Text="0" TextColor="#0F172A" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
                                     <Label Text="órdenes liquidadas" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
 
                             <!-- Bloque Pendientes -->
                             <Border Grid.Column="1" 
-                                    BackgroundColor="#0B1526" 
+                                    BackgroundColor="#FFFFFF" 
                                     StrokeShape="RoundRectangle 12" 
                                     Padding="12,10" 
                                     StrokeThickness="1" 
-                                    Stroke="#3B2613">
+                                    Stroke="#F59E0B">
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
                                     <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
                                         <BoxView Color="#F59E0B" WidthRequest="7" HeightRequest="7" CornerRadius="4" VerticalOptions="Center" />
-                                        <Label Text="PENDIENTES" TextColor="#9CA3AF" FontSize="10" FontAttributes="Bold" />
+                                        <Label Text="PENDIENTES" TextColor="#475569" FontSize="10" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
-                                    <Label x:Name="lblPagosPendientes" Text="0" TextColor="White" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
+                                    <Label x:Name="lblPagosPendientes" Text="0" TextColor="#0F172A" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,2,0,0" />
                                     <Label Text="por liquidar" TextColor="#64748B" FontSize="10" HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
@@ -225,11 +228,71 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- Tarjeta 4: Evolución de Ventas Mensuales vs Meta ($50,000) -->
+                <Border BackgroundColor="#F8FAFC" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="16">
+                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="EVOLUCIÓN DE VENTAS MENSUALES" TextColor="#475569" FontSize="11" FontAttributes="Bold" />
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="Objetivo:" TextColor="#64748B" FontSize="10" />
+                                    <Label Text="$50,000 MXN" TextColor="#34D399" FontSize="10" FontAttributes="Bold" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                            <Border Grid.Column="1" BackgroundColor="#E8F5E9" StrokeShape="RoundRectangle 12" Padding="8,4" StrokeThickness="0">
+                                <Label Text="📈 Tendencia" TextColor="#0277BD" FontSize="10" FontAttributes="Bold" VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <VerticalStackLayout HorizontalOptions="FillAndExpand" Spacing="4">
+                            <!-- Usamos Microcharts LineChart -->
+                            <microcharts:ChartView x:Name="chartVentasMensuales" HeightRequest="180" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Tarjeta 5: Top 5 Servicios (Barras Horizontales Nativas) -->
+                <Border BackgroundColor="#F8FAFC" StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="16">
+                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                            <Label Grid.Column="0" Text="TOP 5 SERVICIOS MÁS RENTABLES" TextColor="#475569" FontSize="11" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <Border Grid.Column="1" BackgroundColor="#FFF8E1" StrokeShape="RoundRectangle 12" Padding="8,4" StrokeThickness="0">
+                                <Label Text="🏆 Estrella" TextColor="#0F172A" FontSize="10" FontAttributes="Bold" VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <VerticalStackLayout x:Name="containerTopServicios" Spacing="12">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <VerticalStackLayout Spacing="4">
+                                        <!-- Header de la barra: Icono, Nombre y Monto -->
+                                        <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+                                            <Label Grid.Column="0" Text="{Binding Icono}" FontSize="12" VerticalOptions="Center" Margin="0,0,6,0" />
+                                            <Label Grid.Column="1" Text="{Binding Servicio}" TextColor="#0F172A" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
+                                            <Label Grid.Column="2" Text="{Binding TotalIngreso, StringFormat='{0:C2}'}" TextColor="#0277BD" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
+                                        </Grid>
+                                        <!-- Fondo de la barra (Rail) -->
+                                        <Border BackgroundColor="#E2E8F0" StrokeShape="RoundRectangle 6" HeightRequest="12" StrokeThickness="0" HorizontalOptions="FillAndExpand">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="{Binding GridLengthPercentage}" />
+                                                    <ColumnDefinition Width="{Binding GridLengthRemaining}" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" BackgroundColor="{Binding ColorBarra}" StrokeShape="RoundRectangle 6" StrokeThickness="0" />
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
             </VerticalStackLayout>
         </ScrollView>
 
         <!-- Barra de Navegación Inferior (Analítica Activa) -->
-        <Border Grid.Row="1" BackgroundColor="#131B2E" StrokeThickness="0" Padding="10,12" StrokeShape="RoundRectangle 24,24,0,0">
+        <Border Grid.Row="1" BackgroundColor="#F8FAFC" StrokeThickness="0" Padding="10,12" StrokeShape="RoundRectangle 24,24,0,0">
             <Grid ColumnDefinitions="*, *, *, *">
 
                 <!-- Dashboard -->
@@ -237,8 +300,8 @@
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnDashboardTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
-                    <Label Text="❖" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="DASHBOARD" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="🏠" FontSize="16" HorizontalOptions="Center" />
+                    <Label Text="DASHBOARD" TextColor="#475569" FontSize="9" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
                 <!-- Servicios -->
@@ -247,7 +310,7 @@
                         <TapGestureRecognizer Tapped="OnInventarioTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
                     <Label Text="🧺" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="SERVICIOS" TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="SERVICIOS" TextColor="#475569" FontSize="9" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
                 <!-- Operaciones -->
@@ -256,7 +319,7 @@
                         <TapGestureRecognizer Tapped="OnAlertasTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
                     <Label Text="⚙️" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="OPERAC." TextColor="#9CA3AF" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="OPERAC." TextColor="#475569" FontSize="9" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
                 <!-- Analítica (Activo en esta página) -->
@@ -264,10 +327,10 @@
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnAnaliticaTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
-                    <Border BackgroundColor="#064E3B" StrokeShape="RoundRectangle 10" WidthRequest="40" HeightRequest="26" StrokeThickness="0" HorizontalOptions="Center">
-                        <Label Text="📊" TextColor="#00E676" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Border BackgroundColor="#E8F5E9" StrokeShape="RoundRectangle 10" WidthRequest="40" HeightRequest="26" StrokeThickness="0" HorizontalOptions="Center">
+                        <Label Text="📊" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
-                    <Label Text="ANALÍTICA" TextColor="#00E676" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Label Text="ANALÍTICA" TextColor="#0277BD" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
             </Grid>

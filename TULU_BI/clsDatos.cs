@@ -10,12 +10,12 @@ namespace TULU_BI
 {
     public class clsClientes
     {
-        public int id;
-        public string nombre = string.Empty;
-        public string telefono = string.Empty;
-        public string direccion = string.Empty;
-        public string correo = string.Empty;
-        public bool activo = true; // Permite saber si el cliente está activo o inactivo
+        public int id { get; set; }
+        public string nombre { get; set; } = string.Empty;
+        public string telefono { get; set; } = string.Empty;
+        public string direccion { get; set; } = string.Empty;
+        public string correo { get; set; } = string.Empty;
+        public bool activo { get; set; } = true; // Permite saber si el cliente está activo o inactivo
     }
 
     public class clsVenta
@@ -125,6 +125,24 @@ namespace TULU_BI
         }
     }
 
+    public class clsVentaMensual
+    {
+        public string Mes { get; set; } = string.Empty;
+        public decimal TotalVenta { get; set; }
+    }
+
+    public class clsTopServicio
+    {
+        public string Servicio { get; set; } = string.Empty;
+        public decimal TotalIngreso { get; set; }
+        
+        // Propiedades para la UI
+        public Microsoft.Maui.GridLength GridLengthPercentage { get; set; } 
+        public Microsoft.Maui.GridLength GridLengthRemaining { get; set; }
+        public string ColorBarra { get; set; } = "#00E676";
+        public string Icono { get; set; } = "🧺";
+    }
+
     public class clsDatos
     {
         public List<clsClientes> cargarClientes()
@@ -141,7 +159,11 @@ namespace TULU_BI
                 {
                     DataTable dt = JsonConvert.DeserializeObject<DataTable>(res) ?? new DataTable();
 
-                    // Detectar dinámicamente si la tabla ya tiene columna 'activo', 'estado' o 'status'
+                    DataColumn? colId = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.ToLower() == "id" || c.ColumnName.ToLower() == "id_cliente");
+                    DataColumn? colNombre = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.ToLower().Contains("nombre"));
+                    DataColumn? colTelefono = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.ToLower().Contains("tel"));
+                    DataColumn? colDireccion = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.ToLower().Contains("dir"));
+                    DataColumn? colCorreo = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.ToLower().Contains("correo") || c.ColumnName.ToLower().Contains("email"));
                     DataColumn? colActivo = dt.Columns.Cast<DataColumn>().FirstOrDefault(c =>
                     {
                         string n = c.ColumnName.Trim().ToLower();
@@ -151,11 +173,11 @@ namespace TULU_BI
                     foreach (DataRow row in dt.Rows)
                     {
                         clsClientes c = new clsClientes();
-                        c.id = row.Table.Columns.Contains("id") && row["id"] != DBNull.Value ? Convert.ToInt32(row["id"]) : 0;
-                        c.nombre = row.Table.Columns.Contains("nombre") && row["nombre"] != DBNull.Value ? Convert.ToString(row["nombre"]) : "";
-                        c.telefono = row.Table.Columns.Contains("telefono") && row["telefono"] != DBNull.Value ? Convert.ToString(row["telefono"]) : "";
-                        c.direccion = row.Table.Columns.Contains("direccion") && row["direccion"] != DBNull.Value ? Convert.ToString(row["direccion"]) : "";
-                        c.correo = row.Table.Columns.Contains("correo") && row["correo"] != DBNull.Value ? Convert.ToString(row["correo"]) : "";
+                        c.id = colId != null && row[colId] != DBNull.Value ? Convert.ToInt32(row[colId]) : 0;
+                        c.nombre = colNombre != null && row[colNombre] != DBNull.Value ? Convert.ToString(row[colNombre]) : "Cliente Desconocido";
+                        c.telefono = colTelefono != null && row[colTelefono] != DBNull.Value ? Convert.ToString(row[colTelefono]) : "";
+                        c.direccion = colDireccion != null && row[colDireccion] != DBNull.Value ? Convert.ToString(row[colDireccion]) : "";
+                        c.correo = colCorreo != null && row[colCorreo] != DBNull.Value ? Convert.ToString(row[colCorreo]) : "";
 
                         if (colActivo != null && row[colActivo] != DBNull.Value)
                         {
@@ -278,9 +300,42 @@ namespace TULU_BI
         public List<clsOrden> cargarOrdenes()
         {
             List<clsOrden> lista = new List<clsOrden>();
+            Dictionary<int, decimal> totalesPorOrden = new Dictionary<int, decimal>();
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
+                
+                // 1. Cargar detalles para calcular totales
+                try
+                {
+                    string resDetalles = ws.CargaORDEN_DETALLE();
+                    if (!string.IsNullOrWhiteSpace(resDetalles) && !resDetalles.StartsWith("\"Error") && !resDetalles.StartsWith("Error"))
+                    {
+                        DataTable dtDet = JsonConvert.DeserializeObject<DataTable>(resDetalles) ?? new DataTable();
+                        DataColumn? colIdOrdenDet = dtDet.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.Trim().ToLower() == "id_orden");
+                        DataColumn? colPrecioCob = dtDet.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.Trim().ToLower() == "precio_cobrado");
+                        DataColumn? colCantidadDet = dtDet.Columns.Cast<DataColumn>().FirstOrDefault(c => c.ColumnName.Trim().ToLower() == "cantidad");
+                        
+                        foreach (DataRow r in dtDet.Rows)
+                        {
+                            if (colIdOrdenDet != null && r[colIdOrdenDet] != DBNull.Value)
+                            {
+                                int idO = Convert.ToInt32(r[colIdOrdenDet]);
+                                decimal precio = colPrecioCob != null && r[colPrecioCob] != DBNull.Value ? Convert.ToDecimal(r[colPrecioCob]) : 0m;
+                                int cant = colCantidadDet != null && r[colCantidadDet] != DBNull.Value ? Convert.ToInt32(r[colCantidadDet]) : 1;
+                                
+                                if (!totalesPorOrden.ContainsKey(idO))
+                                    totalesPorOrden[idO] = 0;
+                                totalesPorOrden[idO] += (precio * cant);
+                            }
+                        }
+                    }
+                }
+                catch (Exception exDet)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error cargando detalles: " + exDet.Message);
+                }
+
                 string res = ws.CargaORDENES();
                 ws.Close();
 
@@ -324,7 +379,7 @@ namespace TULU_BI
                         o.id_orden    = colId       != null && row[colId]       != DBNull.Value ? Convert.ToInt32(row[colId])   : 0;
                         o.id_cliente  = colCliente  != null && row[colCliente]  != DBNull.Value ? Convert.ToInt32(row[colCliente]) : 0;
                         o.id_empleado = colEmpleado != null && row[colEmpleado] != DBNull.Value ? Convert.ToInt32(row[colEmpleado]) : 0;
-                        o.total       = colTotal    != null && row[colTotal]    != DBNull.Value ? Convert.ToDecimal(row[colTotal]) : 0m;
+                        o.total = totalesPorOrden.ContainsKey(o.id_orden) ? totalesPorOrden[o.id_orden] : (colTotal != null && row[colTotal] != DBNull.Value ? Convert.ToDecimal(row[colTotal]) : 0m);
                         o.tipo_entrega = colTipoEntrega != null && row[colTipoEntrega] != DBNull.Value ? Convert.ToInt32(row[colTipoEntrega]) : 1;
 
                         if (colFechaIngreso != null && row[colFechaIngreso] != DBNull.Value)
@@ -517,5 +572,88 @@ namespace TULU_BI
 
             return lista;
         }
+
+        public string registrarNuevaOperacion(int idCliente, int idTrabajo, decimal total)
+        {
+            try
+            {
+                ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
+                // Asumimos que el empleado que registra es el id_empleado = 1 (puedes cambiarlo si manejas sesión)
+                // Asumimos que tipo_entrega = 1 (en tienda) y estado_pago = "Pagado" por defecto al registrar
+                string res = ws.RegistrarOperacion(idCliente, idTrabajo, 1, total, "Pagado");
+                ws.Close();
+                
+                if (res.Contains("exito") || res.Contains("true") || !res.StartsWith("Error"))
+                    return "Exito";
+                else
+                    return res; // Devuelve el mensaje de error de SQL que manda el WCF
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error registrarNuevaOperacion: " + ex.Message);
+                return ex.Message; // Devuelve la excepción completa (ej: EndpointNotFoundException o FaultException)
+            }
+        }
+
+        public List<clsVentaMensual> cargarVentasMensuales()
+        {
+            List<clsVentaMensual> lista = new List<clsVentaMensual>();
+            try
+            {
+                ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
+                // NOTA: Si esto marca error en Visual Studio, debes hacer clic derecho en ServiceReference1 y seleccionar "Actualizar referencia de servicio".
+                string res = ws.CargaVentasMensuales();
+                ws.Close();
+
+                if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
+                {
+                    DataTable dt = JsonConvert.DeserializeObject<DataTable>(res) ?? new DataTable();
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        lista.Add(new clsVentaMensual
+                        {
+                            Mes = row["Mes"] != DBNull.Value ? row["Mes"].ToString() : "",
+                            TotalVenta = row["TotalVenta"] != DBNull.Value ? Convert.ToDecimal(row["TotalVenta"]) : 0
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error cargarVentasMensuales: " + ex.Message);
+            }
+            return lista;
+        }
+
+        public List<clsTopServicio> cargarTopServicios()
+        {
+            List<clsTopServicio> lista = new List<clsTopServicio>();
+            try
+            {
+                ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
+                // NOTA: Si esto marca error en VS, actualiza el Web Service.
+                string res = ws.CargaTopServicios();
+                ws.Close();
+
+                if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
+                {
+                    DataTable dt = JsonConvert.DeserializeObject<DataTable>(res) ?? new DataTable();
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        lista.Add(new clsTopServicio
+                        {
+                            Servicio = row["Servicio"] != DBNull.Value ? row["Servicio"].ToString() : "",
+                            TotalIngreso = row["TotalIngreso"] != DBNull.Value ? Convert.ToDecimal(row["TotalIngreso"]) : 0
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error cargarTopServicios: " + ex.Message);
+            }
+            return lista;
+        }
     }
 }
+
