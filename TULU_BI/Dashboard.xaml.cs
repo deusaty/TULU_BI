@@ -80,23 +80,12 @@ public partial class MainPage : ContentPage
         {
             clsDatos datos = new clsDatos();
 
-            // Cargar todo en paralelo para mayor velocidad
-            var tareasTask = Task.WhenAll(
-                Task.Run(() => datos.cargarVentas()),
-                Task.Run(() => datos.cargarOrdenes()),
-                Task.Run(() => datos.cargarClientes()),
-                Task.Run(() => datos.cargarEmpleados()),
-                Task.Run(() => datos.cargarServicios())
-            );
-
-            await tareasTask;
-
-            // Recuperar resultados
-            var ventas    = await Task.Run(() => datos.cargarVentas());
-            var ordenes   = await Task.Run(() => datos.cargarOrdenes());
-            var clientes  = await Task.Run(() => datos.cargarClientes());
-            var empleados = await Task.Run(() => datos.cargarEmpleados());
-            var servicios = await Task.Run(() => datos.cargarServicios());
+            // Cargar de forma secuencial para evitar crasheos de concurrencia de WCF en Android
+            var ventas = await datos.cargarVentasAsync();
+            var ordenes = await datos.cargarOrdenesAsync();
+            var clientes = await datos.cargarClientesAsync();
+            var empleados = await datos.cargarEmpleadosAsync();
+            var servicios = await datos.cargarServiciosAsync();
 
             // Filtro para mostrar el último mes con datos reales
             var ultimaVenta = ventas.OrderByDescending(v => v.fecha_venta).FirstOrDefault();
@@ -104,69 +93,6 @@ public partial class MainPage : ContentPage
 
             var ventasMes = ventas.Where(v => v.fecha_venta.Month == mesFiltro.Month && v.fecha_venta.Year == mesFiltro.Year).ToList();
             var ordenesMes = ordenes.Where(o => o.fecha_ingreso.Month == mesFiltro.Month && o.fecha_ingreso.Year == mesFiltro.Year).ToList();
-
-            // --- REQUERIMIENTO DEL CLIENTE: DATOS REALISTAS PARA DEMO (Meta ~48.5k) ---
-            // Aumentar la cantidad de ventas en memoria y ajustar sus precios para 
-            // que el ticket promedio sea congruente (aprox. 280 ventas de ~$170)
-            if (ventasMes.Count > 0)
-            {
-                decimal targetSuma = 48500m;
-                int targetCountVentas = 285;
-                decimal sumaReal = ventasMes.Sum(v => v.subtotal);
-                
-                if (sumaReal > 0)
-                {
-                    decimal factorPrecio = targetSuma / sumaReal;
-                    var ventasSimuladas = new List<clsVenta>();
-                    var ordenesSimuladas = new List<clsOrden>();
-                    Random rnd = new Random();
-
-                    for (int i = 0; i < targetCountVentas; i++)
-                    {
-                        var originalVenta = ventasMes[i % ventasMes.Count];
-                        ventasSimuladas.Add(new clsVenta
-                        {
-                            id_venta = originalVenta.id_venta + 10000 + i,
-                            id_cliente = originalVenta.id_cliente + (i % 150), // Genera aprox 150 usuarios únicos
-                            id_trabajo = originalVenta.id_trabajo,
-                            cantidad = originalVenta.cantidad,
-                            subtotal = originalVenta.subtotal * factorPrecio,
-                            fecha_venta = originalVenta.fecha_venta,
-                            metodo_pago = originalVenta.metodo_pago
-                        });
-                    }
-
-                    if (ordenesMes.Count > 0)
-                    {
-                        for (int i = 0; i < targetCountVentas; i++)
-                        {
-                            var originalOrden = ordenesMes[i % ordenesMes.Count];
-                            ordenesSimuladas.Add(new clsOrden
-                            {
-                                id_orden = originalOrden.id_orden + 10000 + i,
-                                id_cliente = originalOrden.id_cliente + (i % 150), // Debe coincidir con la generación de ventas
-                                id_empleado = originalOrden.id_empleado,
-                                estado = originalOrden.estado,
-                                total = originalOrden.total * factorPrecio,
-                                fecha_ingreso = originalOrden.fecha_ingreso,
-                                fecha_listo = originalOrden.fecha_listo,
-                                fecha_entrega_a = originalOrden.fecha_entrega_a,
-                                tipo_entrega = originalOrden.tipo_entrega
-                            });
-                        }
-                    }
-                    
-                    // Ajuste fino para clavar la suma exacta
-                    decimal sumGenerada = ventasSimuladas.Sum(v => v.subtotal);
-                    decimal ajustador = targetSuma / (sumGenerada == 0 ? 1 : sumGenerada);
-                    ventasSimuladas.ForEach(v => v.subtotal *= ajustador);
-                    ordenesSimuladas.ForEach(o => o.total *= ajustador);
-
-                    ventasMes = ventasSimuladas;
-                    ordenesMes = ordenesSimuladas;
-                }
-            }
-            // -------------------------------------------------------------------------
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -194,7 +120,6 @@ public partial class MainPage : ContentPage
             var emp = empleados[0];
             lblNombreEmpleado.Text = emp.nombre_corto;
             lblRol.Text = emp.rol;
-            lblTurno.Text = $"• Lavandería TULU — ID #{emp.id_empleado}";
         }
     }
 
@@ -276,10 +201,9 @@ public partial class MainPage : ContentPage
 
         foreach (var emp in empleados)
         {
-            // Fila de empleado: Avatar + Nombre/Rol
+            // Fila de empleado: Nombre/Rol + Emoji
             var fila = new Grid { ColumnDefinitions = new ColumnDefinitionCollection
                 {
-                    new ColumnDefinition { Width = GridLength.Auto },
                     new ColumnDefinition { Width = GridLength.Star },
                     new ColumnDefinition { Width = GridLength.Auto },
                 },
@@ -287,30 +211,9 @@ public partial class MainPage : ContentPage
                 VerticalOptions = LayoutOptions.Center
             };
 
-            // Avatar con iniciales
-            var avatar = new Border
-            {
-                BackgroundColor = Color.FromArgb("#0F2A1A"),
-                StrokeShape = new Microsoft.Maui.Controls.Shapes.Ellipse(),
-                WidthRequest = 38,
-                HeightRequest = 38,
-                StrokeThickness = 0,
-                VerticalOptions = LayoutOptions.Center
-            };
-            var lblInic = new Label
-            {
-                Text = emp.iniciales,
-                TextColor = Color.FromArgb("#34D399"),
-                FontSize = 13,
-                FontAttributes = FontAttributes.Bold,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center
-            };
-            avatar.Content = lblInic;
-
             // Datos
             var info = new VerticalStackLayout { VerticalOptions = LayoutOptions.Center, Spacing = 1 };
-            info.Add(new Label { Text = emp.nombre_corto, TextColor = Colors.White, FontSize = 13, FontAttributes = FontAttributes.Bold });
+            info.Add(new Label { Text = emp.nombre_corto, TextColor = Color.FromArgb("#0F172A"), FontSize = 13, FontAttributes = FontAttributes.Bold });
             info.Add(new Label { Text = emp.rol, TextColor = Color.FromArgb("#64748B"), FontSize = 11 });
 
             // Emoji de rol
@@ -322,9 +225,8 @@ public partial class MainPage : ContentPage
                 HorizontalOptions = LayoutOptions.End
             };
 
-            fila.Add(avatar);      Grid.SetColumn(avatar, 0);
-            fila.Add(info);        Grid.SetColumn(info, 1);
-            fila.Add(emojiLabel);  Grid.SetColumn(emojiLabel, 2);
+            fila.Add(info);        Grid.SetColumn(info, 0);
+            fila.Add(emojiLabel);  Grid.SetColumn(emojiLabel, 1);
 
             containerEmpleados.Children.Add(fila);
 
@@ -334,7 +236,7 @@ public partial class MainPage : ContentPage
                 containerEmpleados.Children.Add(new BoxView
                 {
                     HeightRequest = 1,
-                    BackgroundColor = Color.FromArgb("#1E293B"),
+                    BackgroundColor = Color.FromArgb("#E2E8F0"),
                     Margin = new Thickness(0, 4)
                 });
             }

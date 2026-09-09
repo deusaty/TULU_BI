@@ -121,10 +121,10 @@ namespace ServiceReference1
         System.Threading.Tasks.Task<string> CargaTopServiciosAsync();
 
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IService1/RegistrarOperacion", ReplyAction="http://tempuri.org/IService1/RegistrarOperacionResponse")]
-        string RegistrarOperacion(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago);
+        string RegistrarOperacion(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago, string metodo_pago);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IService1/RegistrarOperacion", ReplyAction="http://tempuri.org/IService1/RegistrarOperacionResponse")]
-        System.Threading.Tasks.Task<string> RegistrarOperacionAsync(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago);
+        System.Threading.Tasks.Task<string> RegistrarOperacionAsync(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago, string metodo_pago);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IService1/GetDataUsingDataContract", ReplyAction="http://tempuri.org/IService1/GetDataUsingDataContractResponse")]
         ServiceReference1.CompositeType GetDataUsingDataContract(ServiceReference1.CompositeType composite);
@@ -293,14 +293,14 @@ namespace ServiceReference1
             return base.Channel.CargaTopServiciosAsync();
         }
 
-        public string RegistrarOperacion(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago)
+        public string RegistrarOperacion(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago, string metodo_pago)
         {
-            return base.Channel.RegistrarOperacion(id_cliente, id_trabajo, id_empleado, total, estado_pago);
+            return base.Channel.RegistrarOperacion(id_cliente, id_trabajo, id_empleado, total, estado_pago, metodo_pago);
         }
         
-        public System.Threading.Tasks.Task<string> RegistrarOperacionAsync(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago)
+        public System.Threading.Tasks.Task<string> RegistrarOperacionAsync(int id_cliente, int id_trabajo, int id_empleado, decimal total, string estado_pago, string metodo_pago)
         {
-            return base.Channel.RegistrarOperacionAsync(id_cliente, id_trabajo, id_empleado, total, estado_pago);
+            return base.Channel.RegistrarOperacionAsync(id_cliente, id_trabajo, id_empleado, total, estado_pago, metodo_pago);
         }
         
         public ServiceReference1.CompositeType GetDataUsingDataContract(ServiceReference1.CompositeType composite)

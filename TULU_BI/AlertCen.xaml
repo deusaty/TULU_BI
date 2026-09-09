@@ -153,10 +153,10 @@
                 <!-- ─────────────────────────────────────── -->
                 <VerticalStackLayout x:Name="secMorosos" Padding="16,20,16,0" Spacing="10">
 
-                    <Grid ColumnDefinitions="*, Auto">
+                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
                         <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
                             <Border BackgroundColor="#EF4444" StrokeShape="Ellipse" WidthRequest="8" HeightRequest="8" StrokeThickness="0" VerticalOptions="Center" />
-                            <Label Text="⚠️  Clientes con Saldo Pendiente" TextColor="#0F172A" FontSize="15" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Label Text="⚠️  Clientes con Saldo Pendiente" TextColor="#0F172A" FontSize="15" FontAttributes="Bold" VerticalOptions="Center" LineBreakMode="TailTruncation" />
                         </HorizontalStackLayout>
                         <Label Grid.Column="1" x:Name="lblContMorosos" Text="" TextColor="#F87171" FontSize="11" VerticalTextAlignment="Center" />
                     </Grid>

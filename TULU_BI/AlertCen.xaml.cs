@@ -14,6 +14,7 @@ public partial class AlertCen : ContentPage
     private List<clsOrden> _allListas = new();
     private List<clsOrden> _allDomicilios = new();
     private List<clsOrden> _allMorosos = new();
+    private List<clsClientes> _allClientes = new();
 
     public AlertCen()
     {
@@ -35,8 +36,15 @@ public partial class AlertCen : ContentPage
         {
             clsDatos datos = new clsDatos();
 
-            var ordenes   = await Task.Run(() => datos.cargarOrdenes());
-            var empleados = await Task.Run(() => datos.cargarEmpleados());
+            var taskOrdenes = datos.cargarOrdenesAsync();
+            var taskEmpleados = datos.cargarEmpleadosAsync();
+            var taskClientes = datos.cargarClientesAsync();
+
+            await Task.WhenAll(taskOrdenes, taskEmpleados, taskClientes);
+
+            var ordenes = await taskOrdenes;
+            var empleados = await taskEmpleados;
+            var clientes = await taskClientes;
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -44,6 +52,7 @@ public partial class AlertCen : ContentPage
 
                 _allOrdenes = ordenes;
                 _allEmpleados = empleados;
+                _allClientes = clientes;
 
                 _allListas     = ordenes.Where(o => o.fecha_listo != DateTime.MinValue).OrderBy(o => o.fecha_listo).ToList();
                 _allDomicilios = ordenes.Where(o => o.es_domicilio).OrderBy(o => o.fecha_entrega_a).ToList();
@@ -74,10 +83,10 @@ public partial class AlertCen : ContentPage
         {
             var card = new Border
             {
-                BackgroundColor = Color.FromArgb("#131B2E"),
+                BackgroundColor = Colors.White,
                 StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 14 },
                 StrokeThickness = 1,
-                Stroke = Color.FromArgb("#064E3B"),
+                Stroke = Color.FromArgb("#E2E8F0"), // Gris claro
                 Padding = new Thickness(14, 12)
             };
 
@@ -104,13 +113,14 @@ public partial class AlertCen : ContentPage
 
             // Info central
             var info = new VerticalStackLayout { VerticalOptions = LayoutOptions.Center, Spacing = 3 };
-            info.Add(new Label { Text = $"Orden #{orden.id_orden} — Cliente {orden.id_cliente}", TextColor = Colors.White, FontSize = 13, FontAttributes = FontAttributes.Bold });
-            info.Add(new Label { Text = $"🏁 Lista: {orden.fecha_listo_corta}", TextColor = Color.FromArgb("#34D399"), FontSize = 11 });
-            info.Add(new Label { Text = $"📅 Entrega: {orden.fecha_entrega_corta}  {orden.tipo_entrega_texto}", TextColor = Color.FromArgb("#94A3B8"), FontSize = 11 });
+            string nombreCliente = _allClientes.FirstOrDefault(c => c.id == orden.id_cliente)?.nombre ?? "Desconocido";
+            info.Add(new Label { Text = $"Orden #{orden.id_orden} — Cliente #{orden.id_cliente} ({nombreCliente})", TextColor = Color.FromArgb("#1E293B"), FontSize = 13, FontAttributes = FontAttributes.Bold });
+            info.Add(new Label { Text = $"🏁 Lista: {orden.fecha_listo_corta}", TextColor = Color.FromArgb("#059669"), FontSize = 11 });
+            info.Add(new Label { Text = $"📅 Entrega: {orden.fecha_entrega_corta}  {orden.tipo_entrega_texto}", TextColor = Color.FromArgb("#64748B"), FontSize = 11 });
 
             // Monto
             var monto = new VerticalStackLayout { VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.End, Spacing = 3 };
-            monto.Add(new Label { Text = $"${orden.total:0}", TextColor = Colors.White, FontSize = 14, FontAttributes = FontAttributes.Bold, HorizontalOptions = LayoutOptions.End });
+            monto.Add(new Label { Text = $"${orden.total:0}", TextColor = Color.FromArgb("#1E293B"), FontSize = 14, FontAttributes = FontAttributes.Bold, HorizontalOptions = LayoutOptions.End });
             var badge = new Border
             {
                 BackgroundColor = Color.FromArgb("#064E3B"),
@@ -143,10 +153,10 @@ public partial class AlertCen : ContentPage
 
             var card = new Border
             {
-                BackgroundColor = Color.FromArgb("#131B2E"),
+                BackgroundColor = Colors.White,
                 StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 14 },
                 StrokeThickness = 1,
-                Stroke = Color.FromArgb(orden.es_pendiente ? "#451A03" : "#1E3A5F"),
+                Stroke = Color.FromArgb("#E2E8F0"),
                 Padding = new Thickness(14, 12)
             };
 
@@ -171,12 +181,13 @@ public partial class AlertCen : ContentPage
             iconBorder.Content = new Label { Text = "🚚", FontSize = 20, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
 
             var info = new VerticalStackLayout { VerticalOptions = LayoutOptions.Center, Spacing = 3 };
-            info.Add(new Label { Text = $"Orden #{orden.id_orden} — Cliente {orden.id_cliente}", TextColor = Colors.White, FontSize = 13, FontAttributes = FontAttributes.Bold });
-            info.Add(new Label { Text = $"👤 Repartidor: {nomRep}", TextColor = Color.FromArgb("#60A5FA"), FontSize = 11 });
-            info.Add(new Label { Text = $"🕐 Entrega programada: {orden.fecha_entrega_corta}", TextColor = Color.FromArgb("#94A3B8"), FontSize = 11 });
+            string nombreCliente = _allClientes.FirstOrDefault(c => c.id == orden.id_cliente)?.nombre ?? "Desconocido";
+            info.Add(new Label { Text = $"Orden #{orden.id_orden} — Cliente #{orden.id_cliente} ({nombreCliente})", TextColor = Color.FromArgb("#1E293B"), FontSize = 13, FontAttributes = FontAttributes.Bold });
+            info.Add(new Label { Text = $"👤 Repartidor: {nomRep}", TextColor = Color.FromArgb("#2563EB"), FontSize = 11 });
+            info.Add(new Label { Text = $"🕐 Entrega programada: {orden.fecha_entrega_corta}", TextColor = Color.FromArgb("#64748B"), FontSize = 11 });
 
             var monto = new VerticalStackLayout { VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.End, Spacing = 3 };
-            monto.Add(new Label { Text = $"${orden.total:0}", TextColor = Colors.White, FontSize = 14, FontAttributes = FontAttributes.Bold, HorizontalOptions = LayoutOptions.End });
+            monto.Add(new Label { Text = $"${orden.total:0}", TextColor = Color.FromArgb("#1E293B"), FontSize = 14, FontAttributes = FontAttributes.Bold, HorizontalOptions = LayoutOptions.End });
 
             var badgePago = new Border
             {
@@ -211,10 +222,10 @@ public partial class AlertCen : ContentPage
         {
             var card = new Border
             {
-                BackgroundColor = Color.FromArgb("#131B2E"),
+                BackgroundColor = Colors.White,
                 StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 14 },
                 StrokeThickness = 1,
-                Stroke = Color.FromArgb("#451A03"),
+                Stroke = Color.FromArgb("#E2E8F0"),
                 Padding = new Thickness(14, 12)
             };
 
@@ -240,11 +251,12 @@ public partial class AlertCen : ContentPage
 
             // Descripción
             var desc = new VerticalStackLayout { Spacing = 4 };
-            desc.Add(new Label { Text = $"Cliente #{orden.id_cliente} — Pago sin liquidar", TextColor = Colors.White, FontSize = 15, FontAttributes = FontAttributes.Bold });
-            desc.Add(new Label { Text = $"Monto pendiente: ${orden.total:0.00} MXN  •  Ingresó: {orden.fecha_ingreso_corta}", TextColor = Color.FromArgb("#9CA3AF"), FontSize = 12, LineBreakMode = LineBreakMode.WordWrap });
+            string nombreCliente = _allClientes.FirstOrDefault(c => c.id == orden.id_cliente)?.nombre ?? "Desconocido";
+            desc.Add(new Label { Text = $"Cliente #{orden.id_cliente} ({nombreCliente}) — Pago sin liquidar", TextColor = Color.FromArgb("#1E293B"), FontSize = 15, FontAttributes = FontAttributes.Bold });
+            desc.Add(new Label { Text = $"Monto pendiente: ${orden.total:0.00} MXN  •  Ingresó: {orden.fecha_ingreso_corta}", TextColor = Color.FromArgb("#475569"), FontSize = 12, LineBreakMode = LineBreakMode.WordWrap });
 
             // Separador
-            var sep = new BoxView { HeightRequest = 1, BackgroundColor = Color.FromArgb("#1F2937"), Margin = new Thickness(0, 2) };
+            var sep = new BoxView { HeightRequest = 1, BackgroundColor = Color.FromArgb("#F1F5F9"), Margin = new Thickness(0, 2) };
 
             // Fila inferior: tiempo + acción
             var botRow = new Grid { ColumnDefinitions = new ColumnDefinitionCollection { new ColumnDefinition { Width = GridLength.Star }, new ColumnDefinition { Width = GridLength.Auto } } };
@@ -346,11 +358,22 @@ public partial class AlertCen : ContentPage
         string term = searchBar.Text?.Trim().ToLower() ?? "";
         string filtro = pickerFiltro.SelectedItem?.ToString() ?? "Todas";
 
-        // Filtrar por ID de cliente
-        var listasFiltradas = string.IsNullOrEmpty(term) ? _allListas : _allListas.Where(o => o.id_cliente.ToString().Contains(term)).ToList();
-        var domiciliosFiltrados = string.IsNullOrEmpty(term) ? _allDomicilios : _allDomicilios.Where(o => o.id_cliente.ToString().Contains(term)).ToList();
-        var morososFiltrados = string.IsNullOrEmpty(term) ? _allMorosos : _allMorosos.Where(o => o.id_cliente.ToString().Contains(term)).ToList();
-        var ordenesFiltradas = string.IsNullOrEmpty(term) ? _allOrdenes : _allOrdenes.Where(o => o.id_cliente.ToString().Contains(term)).ToList();
+        bool esNumero = int.TryParse(term, out int idBuscado);
+
+        Func<clsOrden, bool> matchFiltro = o => 
+        {
+            if (string.IsNullOrEmpty(term)) return true;
+            if (esNumero) return o.id_cliente == idBuscado;
+            
+            string nombreCli = _allClientes.FirstOrDefault(c => c.id == o.id_cliente)?.nombre?.ToLower() ?? "";
+            return nombreCli.Contains(term);
+        };
+
+        // Filtrar por ID de cliente o Nombre
+        var listasFiltradas = _allListas.Where(matchFiltro).ToList();
+        var domiciliosFiltrados = _allDomicilios.Where(matchFiltro).ToList();
+        var morososFiltrados = _allMorosos.Where(matchFiltro).ToList();
+        var ordenesFiltradas = _allOrdenes.Where(matchFiltro).ToList();
 
         // 1. Ocultar todo primero
         secListas.IsVisible = false;
@@ -376,7 +399,7 @@ public partial class AlertCen : ContentPage
         if (filtro == "Todas" || filtro == "Morosos")
         {
             secMorosos.IsVisible = true;
-            lblContMorosos.Text = morososFiltrados.Count > 0 ? $"⚠️ {morososFiltrados.Count}" : "✅ Sin pendientes";
+            lblContMorosos.Text = morososFiltrados.Count > 0 ? $"{morososFiltrados.Count} pendiente(s)" : "";
             PoblarMorosos(morososFiltrados);
         }
 

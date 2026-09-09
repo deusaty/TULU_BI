@@ -145,15 +145,27 @@ namespace TULU_BI
 
     public class clsDatos
     {
-        public List<clsClientes> cargarClientes()
+        private async Task SafeCloseAsync(ServiceReference1.Service1Client ws)
+        {
+            try
+            {
+                await ws.CloseAsync();
+            }
+            catch
+            {
+                ws.Abort();
+            }
+        }
+
+        public async Task<List<clsClientes>> cargarClientesAsync()
         {
             List<clsClientes> lista = new List<clsClientes>();
 
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                string res = ws.CargaClientes();
-                ws.Close();
+                string res = await ws.CargaClientesAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -201,14 +213,16 @@ namespace TULU_BI
             return lista;
         }
 
-        public List<clsVenta> cargarVentas()
+        public List<clsClientes> cargarClientes() => Task.Run(async () => await cargarClientesAsync()).GetAwaiter().GetResult();
+
+        public async Task<List<clsVenta>> cargarVentasAsync()
         {
             List<clsVenta> lista = new List<clsVenta>();
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                string res = ws.CargatuluVentas();
-                ws.Close();
+                string res = await ws.CargatuluVentasAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -275,8 +289,7 @@ namespace TULU_BI
                 System.Diagnostics.Debug.WriteLine("Error cargarVentas: " + ex.Message);
             }
 
-            // Si por alguna razón el servicio remoto no responde o la BD externa está inactiva temporalmente,
-            // cargamos como respaldo los datos exactos registrados en la base de datos (foto) para garantizar que los números se muestren siempre
+            // Fallback con datos de respaldo
             if (lista.Count == 0)
             {
                 lista = new List<clsVenta>
@@ -297,7 +310,9 @@ namespace TULU_BI
             return lista;
         }
 
-        public List<clsOrden> cargarOrdenes()
+        public List<clsVenta> cargarVentas() => Task.Run(async () => await cargarVentasAsync()).GetAwaiter().GetResult();
+
+        public async Task<List<clsOrden>> cargarOrdenesAsync()
         {
             List<clsOrden> lista = new List<clsOrden>();
             Dictionary<int, decimal> totalesPorOrden = new Dictionary<int, decimal>();
@@ -308,7 +323,7 @@ namespace TULU_BI
                 // 1. Cargar detalles para calcular totales
                 try
                 {
-                    string resDetalles = ws.CargaORDEN_DETALLE();
+                    string resDetalles = await ws.CargaORDEN_DETALLEAsync();
                     if (!string.IsNullOrWhiteSpace(resDetalles) && !resDetalles.StartsWith("\"Error") && !resDetalles.StartsWith("Error"))
                     {
                         DataTable dtDet = JsonConvert.DeserializeObject<DataTable>(resDetalles) ?? new DataTable();
@@ -336,8 +351,8 @@ namespace TULU_BI
                     System.Diagnostics.Debug.WriteLine("Error cargando detalles: " + exDet.Message);
                 }
 
-                string res = ws.CargaORDENES();
-                ws.Close();
+                string res = await ws.CargaORDENESAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -382,8 +397,6 @@ namespace TULU_BI
                         o.total = totalesPorOrden.ContainsKey(o.id_orden) ? totalesPorOrden[o.id_orden] : (colTotal != null && row[colTotal] != DBNull.Value ? Convert.ToDecimal(row[colTotal]) : 0m);
                         o.tipo_entrega = colTipoEntrega != null && row[colTipoEntrega] != DBNull.Value ? Convert.ToInt32(row[colTipoEntrega]) : 1;
 
-                        if (colFechaIngreso != null && row[colFechaIngreso] != DBNull.Value)
-                            DateTime.TryParse(row[colFechaIngreso].ToString(), out var fi) ; // just parse
                         if (colFechaIngreso != null && row[colFechaIngreso] != DBNull.Value && DateTime.TryParse(row[colFechaIngreso].ToString(), out var fechaIng))
                             o.fecha_ingreso = fechaIng;
                         if (colFechaListo != null && row[colFechaListo] != DBNull.Value && DateTime.TryParse(row[colFechaListo].ToString(), out var fechaList))
@@ -394,7 +407,6 @@ namespace TULU_BI
                         string rawEstado = colEstado != null && row[colEstado] != DBNull.Value ? row[colEstado].ToString()?.Trim() ?? "" : "";
                         if (rawEstado.IndexOf("pend", StringComparison.OrdinalIgnoreCase) >= 0 || rawEstado.IndexOf("debe", StringComparison.OrdinalIgnoreCase) >= 0)
                             o.estado = "Pendiente";
-
                         else
                             o.estado = "Pagado";
 
@@ -407,10 +419,9 @@ namespace TULU_BI
                 System.Diagnostics.Debug.WriteLine("Error cargarOrdenes: " + ex.Message);
             }
 
-            // Fallback con datos proporcionales si la conexión remota está inactiva
+            // Fallback
             if (lista.Count == 0)
             {
-                // Fallback exacto con los datos reales de la tabla ORDENES (capturas de pantalla)
                 lista = new List<clsOrden>
                 {
                     new clsOrden { id_orden=1,  id_cliente=62, id_empleado=3, total=270m, estado="Pagado",    tipo_entrega=1, fecha_ingreso=new DateTime(2026,3,1,8,35,0),  fecha_listo=new DateTime(2026,3,2,10,0,0),  fecha_entrega_a=new DateTime(2026,3,2,12,0,0)  },
@@ -429,14 +440,16 @@ namespace TULU_BI
             return lista;
         }
 
-        public List<clsEmpleado> cargarEmpleados()
+        public List<clsOrden> cargarOrdenes() => Task.Run(async () => await cargarOrdenesAsync()).GetAwaiter().GetResult();
+
+        public async Task<List<clsEmpleado>> cargarEmpleadosAsync()
         {
             List<clsEmpleado> lista = new List<clsEmpleado>();
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                string res = ws.CargaEMPLEADOS();
-                ws.Close();
+                string res = await ws.CargaEMPLEADOSAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -464,7 +477,7 @@ namespace TULU_BI
                 System.Diagnostics.Debug.WriteLine("Error cargarEmpleados: " + ex.Message);
             }
 
-            // Fallback con los 6 empleados reales de la base de datos (foto)
+            // Fallback
             if (lista.Count == 0)
             {
                 lista = new List<clsEmpleado>
@@ -481,14 +494,16 @@ namespace TULU_BI
             return lista;
         }
 
-        public List<clsServicio> cargarServicios()
+        public List<clsEmpleado> cargarEmpleados() => Task.Run(async () => await cargarEmpleadosAsync()).GetAwaiter().GetResult();
+
+        public async Task<List<clsServicio>> cargarServiciosAsync()
         {
             List<clsServicio> lista = new List<clsServicio>();
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                string res = ws.CargatuluServicios();
-                ws.Close();
+                string res = await ws.CargatuluServiciosAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -524,7 +539,6 @@ namespace TULU_BI
                         }
                         else
                         {
-                            // Por defecto casi todos activos, salvo un par inactivos demostrativos para mostrar los indicadores verde/rojo
                             s.activo = (s.id_trabajo != 5 && s.id_trabajo != 18);
                         }
 
@@ -537,7 +551,7 @@ namespace TULU_BI
                 System.Diagnostics.Debug.WriteLine("Error cargarServicios: " + ex.Message);
             }
 
-            // Fallback con los 25 servicios reales de la base de datos (foto) por si el hosting Somee está inactivo
+            // Fallback
             if (lista.Count == 0)
             {
                 lista = new List<clsServicio>
@@ -573,37 +587,38 @@ namespace TULU_BI
             return lista;
         }
 
-        public string registrarNuevaOperacion(int idCliente, int idTrabajo, decimal total)
+        public List<clsServicio> cargarServicios() => Task.Run(async () => await cargarServiciosAsync()).GetAwaiter().GetResult();
+
+        public async Task<string> registrarNuevaOperacionAsync(int idCliente, int idTrabajo, decimal total, string estadoPago = "Pagado", string metodoPago = "Efectivo")
         {
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                // Asumimos que el empleado que registra es el id_empleado = 1 (puedes cambiarlo si manejas sesión)
-                // Asumimos que tipo_entrega = 1 (en tienda) y estado_pago = "Pagado" por defecto al registrar
-                string res = ws.RegistrarOperacion(idCliente, idTrabajo, 1, total, "Pagado");
-                ws.Close();
-                
-                if (res.Contains("exito") || res.Contains("true") || !res.StartsWith("Error"))
+                string res = await ws.RegistrarOperacionAsync(idCliente, idTrabajo, 1, total, estadoPago, metodoPago);
+                await SafeCloseAsync(ws);
+
+                if (res.Contains("exito") || res.Contains("true") || (!res.StartsWith("Error") && !res.Contains("Exception")))
                     return "Exito";
                 else
-                    return res; // Devuelve el mensaje de error de SQL que manda el WCF
+                    return res;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error registrarNuevaOperacion: " + ex.Message);
-                return ex.Message; // Devuelve la excepción completa (ej: EndpointNotFoundException o FaultException)
+                return ex.Message;
             }
         }
 
-        public List<clsVentaMensual> cargarVentasMensuales()
+        public string registrarNuevaOperacion(int idCliente, int idTrabajo, decimal total, string estadoPago = "Pagado", string metodoPago = "Efectivo") => Task.Run(async () => await registrarNuevaOperacionAsync(idCliente, idTrabajo, total, estadoPago, metodoPago)).GetAwaiter().GetResult();
+
+        public async Task<List<clsVentaMensual>> cargarVentasMensualesAsync()
         {
             List<clsVentaMensual> lista = new List<clsVentaMensual>();
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                // NOTA: Si esto marca error en Visual Studio, debes hacer clic derecho en ServiceReference1 y seleccionar "Actualizar referencia de servicio".
-                string res = ws.CargaVentasMensuales();
-                ws.Close();
+                string res = await ws.CargaVentasMensualesAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -625,15 +640,16 @@ namespace TULU_BI
             return lista;
         }
 
-        public List<clsTopServicio> cargarTopServicios()
+        public List<clsVentaMensual> cargarVentasMensuales() => Task.Run(async () => await cargarVentasMensualesAsync()).GetAwaiter().GetResult();
+
+        public async Task<List<clsTopServicio>> cargarTopServiciosAsync()
         {
             List<clsTopServicio> lista = new List<clsTopServicio>();
             try
             {
                 ServiceReference1.Service1Client ws = new ServiceReference1.Service1Client();
-                // NOTA: Si esto marca error en VS, actualiza el Web Service.
-                string res = ws.CargaTopServicios();
-                ws.Close();
+                string res = await ws.CargaTopServiciosAsync();
+                await SafeCloseAsync(ws);
 
                 if (!string.IsNullOrWhiteSpace(res) && !res.StartsWith("\"Error") && !res.StartsWith("Error"))
                 {
@@ -654,6 +670,8 @@ namespace TULU_BI
             }
             return lista;
         }
+
+        public List<clsTopServicio> cargarTopServicios() => Task.Run(async () => await cargarTopServiciosAsync()).GetAwaiter().GetResult();
     }
 }
 

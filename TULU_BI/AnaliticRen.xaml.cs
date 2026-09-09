@@ -16,100 +16,25 @@ public partial class AnaliticRen : ContentPage
     {
         try
         {
-            // Ejecutar en background para no congelar la UI
-            var (listaClientes, listaVentas, listaOrdenes, ventasMensuales, topServicios) = await Task.Run(() =>
-            {
-                clsDatos datos = new clsDatos();
-                var c = datos.cargarClientes();
-                var v = datos.cargarVentas();
-                var o = datos.cargarOrdenes();
-                var vm = datos.cargarVentasMensuales();
-                var ts = datos.cargarTopServicios();
-                return (c, v, o, vm, ts);
-            });
+            clsDatos datos = new clsDatos();
+            var taskClientes = datos.cargarClientesAsync();
+            var taskVentas = datos.cargarVentasAsync();
+            var taskOrdenes = datos.cargarOrdenesAsync();
+            var taskVentasMensuales = datos.cargarVentasMensualesAsync();
+            var taskTopServicios = datos.cargarTopServiciosAsync();
 
-            // --- NORMALIZADOR DE DATOS PARA HACER MATCH CON DASHBOARD (Meta ~48.5k) ---
-            var ultimaVenta = listaVentas.OrderByDescending(v => v.fecha_venta).FirstOrDefault();
-            DateTime mesFiltro = ultimaVenta != null ? ultimaVenta.fecha_venta : DateTime.Now;
+            await Task.WhenAll(taskClientes, taskVentas, taskOrdenes, taskVentasMensuales, taskTopServicios);
 
-            var ventasMes = listaVentas.Where(v => v.fecha_venta.Month == mesFiltro.Month && v.fecha_venta.Year == mesFiltro.Year).ToList();
-            var ordenesMes = listaOrdenes.Where(o => o.fecha_ingreso.Month == mesFiltro.Month && o.fecha_ingreso.Year == mesFiltro.Year).ToList();
+            var listaClientes = await taskClientes;
+            var listaVentas = await taskVentas;
+            var listaOrdenes = await taskOrdenes;
+            var ventasMensuales = await taskVentasMensuales;
+            var topServicios = await taskTopServicios;
 
-            if (ventasMes.Count > 0)
-            {
-                decimal targetSuma = 48500m;
-                int targetCountVentas = 285;
-                decimal sumaReal = ventasMes.Sum(v => v.subtotal);
-                
-                if (sumaReal > 0)
-                {
-                    decimal factorPrecio = targetSuma / sumaReal;
-                    var ventasSimuladas = new List<clsVenta>();
-                    var ordenesSimuladas = new List<clsOrden>();
+            // Filtrar por el mes actual (mes real del sistema)
+            DateTime mesFiltro = DateTime.Now;
 
-                    for (int i = 0; i < targetCountVentas; i++)
-                    {
-                        var originalVenta = ventasMes[i % ventasMes.Count];
-                        ventasSimuladas.Add(new clsVenta
-                        {
-                            id_venta = originalVenta.id_venta + 10000 + i,
-                            id_cliente = originalVenta.id_cliente + (i % 150), // Genera aprox 150 usuarios únicos
-                            id_trabajo = originalVenta.id_trabajo,
-                            cantidad = originalVenta.cantidad,
-                            subtotal = originalVenta.subtotal * factorPrecio,
-                            fecha_venta = originalVenta.fecha_venta,
-                            metodo_pago = originalVenta.metodo_pago
-                        });
-                    }
 
-                    if (ordenesMes.Count > 0)
-                    {
-                        for (int i = 0; i < targetCountVentas; i++)
-                        {
-                            var originalOrden = ordenesMes[i % ordenesMes.Count];
-                            ordenesSimuladas.Add(new clsOrden
-                            {
-                                id_orden = originalOrden.id_orden + 10000 + i,
-                                id_cliente = originalOrden.id_cliente + (i % 150),
-                                id_empleado = originalOrden.id_empleado,
-                                estado = originalOrden.estado,
-                                total = originalOrden.total * factorPrecio,
-                                fecha_ingreso = originalOrden.fecha_ingreso,
-                                fecha_listo = originalOrden.fecha_listo,
-                                fecha_entrega_a = originalOrden.fecha_entrega_a,
-                                tipo_entrega = originalOrden.tipo_entrega
-                            });
-                        }
-                    }
-                    
-                    decimal sumGenerada = ventasSimuladas.Sum(v => v.subtotal);
-                    decimal ajustador = targetSuma / (sumGenerada == 0 ? 1 : sumGenerada);
-                    ventasSimuladas.ForEach(v => v.subtotal *= ajustador);
-                    ordenesSimuladas.ForEach(o => o.total *= ajustador);
-
-                    // Reemplazamos los datos del mes en las listas globales
-                    listaVentas.RemoveAll(v => v.fecha_venta.Month == mesFiltro.Month && v.fecha_venta.Year == mesFiltro.Year);
-                    listaVentas.AddRange(ventasSimuladas);
-
-                    listaOrdenes.RemoveAll(o => o.fecha_ingreso.Month == mesFiltro.Month && o.fecha_ingreso.Year == mesFiltro.Year);
-                    listaOrdenes.AddRange(ordenesSimuladas);
-
-                    // Ajustar la gráfica de ventas mensuales
-                    if (ventasMensuales.Count > 0 && factorPrecio > 0)
-                    {
-                        ventasMensuales.ForEach(vm => vm.TotalVenta *= factorPrecio);
-                        // Asegurar precisión exacta en el último mes
-                        ventasMensuales.Last().TotalVenta = targetSuma;
-                    }
-
-                    // Ajustar Top Servicios (escala proporcional para sumar 48.5k en vez de 66k)
-                    if (topServicios.Count > 0 && factorPrecio > 0)
-                    {
-                        topServicios.ForEach(ts => ts.TotalIngreso *= factorPrecio);
-                    }
-                }
-            }
-            // --------------------------------------------------------------------------
 
             // 1. Métrica: Clientes Registrados
             if (listaClientes != null && listaClientes.Count > 0)

@@ -33,9 +33,13 @@ public partial class GesInv : ContentPage
         try
         {
             clsDatos datos = new clsDatos();
-            // Ejecutar en hilo secundario para evitar congelar la interfaz
-            List<clsServicio> lista = await Task.Run(() => datos.cargarServicios());
-            List<clsClientes> listaClientes = await Task.Run(() => datos.cargarClientes());
+            var taskServicios = datos.cargarServiciosAsync();
+            var taskClientes = datos.cargarClientesAsync();
+
+            await Task.WhenAll(taskServicios, taskClientes);
+
+            List<clsServicio> lista = await taskServicios;
+            List<clsClientes> listaClientes = await taskClientes;
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -198,8 +202,21 @@ public partial class GesInv : ContentPage
 
         try
         {
+            // Usar SelectedIndex es más confiable que SelectedItem con x:Array en MAUI Android
+            string estadoSelec = pckEstadoPago.SelectedIndex switch
+            {
+                1 => "Pendiente",
+                _ => "Pagado"   // 0 o cualquier otro = Pagado
+            };
+            string metodoSelec = pckMetodoPago.SelectedIndex switch
+            {
+                1 => "Tarjeta",
+                2 => "Transferencia",
+                _ => "Efectivo"  // 0 o cualquier otro = Efectivo
+            };
+
             clsDatos datos = new clsDatos();
-            string resultado = await Task.Run(() => datos.registrarNuevaOperacion(clienteSelec.id, _servicioSeleccionado.id_trabajo, _servicioSeleccionado.precio_actual));
+            string resultado = await datos.registrarNuevaOperacionAsync(clienteSelec.id, _servicioSeleccionado.id_trabajo, _servicioSeleccionado.precio_actual, estadoSelec, metodoSelec);
             
             if (resultado == "Exito")
             {

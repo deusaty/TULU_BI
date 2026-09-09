@@ -153,98 +153,96 @@
                 <VerticalStackLayout x:Name="containerServicios" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Border BackgroundColor="#F8FAFC" 
+                            <Border BackgroundColor="#FFFFFF" 
                                     StrokeThickness="1" 
                                     Stroke="#E2E8F0" 
-                                    Padding="14,12" 
+                                    Padding="16" 
+                                    Margin="0,0,0,6"
                                     StrokeShape="RoundRectangle 16">
-                                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                <Grid RowDefinitions="Auto, Auto" RowSpacing="16">
+                                    
+                                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="14" VerticalOptions="Center">
 
-                                    <!-- Icono del servicio -->
-                                    <Border Grid.Column="0" 
-                                            BackgroundColor="#0B1120" 
-                                            StrokeShape="RoundRectangle 12" 
-                                            WidthRequest="46" 
-                                            HeightRequest="46" 
-                                            StrokeThickness="0" 
-                                            VerticalOptions="Center">
-                                        <Label Text="{Binding icono}" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Border>
+                                        <!-- Icono del servicio -->
+                                        <Border Grid.Column="0" 
+                                                BackgroundColor="#F1F5F9" 
+                                                StrokeShape="RoundRectangle 14" 
+                                                WidthRequest="54" 
+                                                HeightRequest="54" 
+                                                StrokeThickness="0" 
+                                                VerticalOptions="Center">
+                                            <Label Text="{Binding icono}" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
 
-                                    <!-- Datos: Nombre, ID y Tiempo Estimado -->
-                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="3">
-                                        <Label Text="{Binding descripcion_servicio}" 
-                                               TextColor="#0F172A" 
-                                               FontSize="14" 
-                                               FontAttributes="Bold" 
-                                               LineBreakMode="TailTruncation" 
-                                               MaxLines="2" />
+                                        <!-- Datos: Nombre, ID y Tiempo Estimado -->
+                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                            <Label Text="{Binding descripcion_servicio}" 
+                                                   TextColor="#0F172A" 
+                                                   FontSize="15" 
+                                                   FontAttributes="Bold" 
+                                                   LineBreakMode="TailTruncation" 
+                                                   MaxLines="2" />
 
-                                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                                            <!-- Tiempo estimado badge -->
-                                            <Border BackgroundColor="#E1F5FE" 
-                                                    StrokeShape="RoundRectangle 6" 
-                                                    Padding="6,2" 
-                                                    StrokeThickness="0">
+                                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                                <!-- ID Trabajo -->
+                                                <Label Text="{Binding id_trabajo, StringFormat='#{0}'}" 
+                                                       TextColor="#64748B" 
+                                                       FontSize="12" 
+                                                       VerticalTextAlignment="Center" />
+                                                <Label Text="•" TextColor="#CBD5E1" FontSize="12" VerticalOptions="Center" />
+                                                <!-- Tiempo estimado -->
                                                 <HorizontalStackLayout Spacing="4">
-                                                    <Label Text="⏱️" FontSize="9" VerticalOptions="Center" />
-                                                    <Label Text="{Binding tiempo_formateado}" TextColor="#475569" FontSize="11" FontAttributes="Bold" VerticalOptions="Center" />
+                                                    <Label Text="⏱️" FontSize="10" VerticalOptions="Center" />
+                                                    <Label Text="{Binding tiempo_formateado}" TextColor="#475569" FontSize="12" VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+
+                                        <!-- Lado Derecho: Precio y Bolita Verde/Roja con estado -->
+                                        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End" Spacing="6">
+                                            <!-- Precio Actual -->
+                                            <Label Text="{Binding precio_formateado}" 
+                                                   TextColor="#0277BD" 
+                                                   FontSize="16" 
+                                                   FontAttributes="Bold" 
+                                                   HorizontalOptions="End" />
+
+                                            <!-- Bolita verde o roja -->
+                                            <Border BackgroundColor="{Binding estado_bg}" 
+                                                    StrokeShape="RoundRectangle 12" 
+                                                    Padding="8,4" 
+                                                    StrokeThickness="0" 
+                                                    HorizontalOptions="End">
+                                                <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                                    <Border BackgroundColor="{Binding estado_color}" 
+                                                            StrokeShape="Ellipse" 
+                                                            WidthRequest="6" 
+                                                            HeightRequest="6" 
+                                                            StrokeThickness="0" 
+                                                            VerticalOptions="Center" />
+                                                    <Label Text="{Binding estado_texto}" 
+                                                           TextColor="{Binding estado_text_color}" 
+                                                           FontSize="10" 
+                                                           FontAttributes="Bold" 
+                                                           VerticalOptions="Center" />
                                                 </HorizontalStackLayout>
                                             </Border>
+                                        </VerticalStackLayout>
+                                    </Grid>
 
-                                            <!-- ID Trabajo -->
-                                            <Label Text="{Binding id_trabajo, StringFormat='#{0}'}" 
-                                                   TextColor="#64748B" 
-                                                   FontSize="11" 
-                                                   VerticalTextAlignment="Center" />
+                                    <!-- Botón Registrar Venta (Abajo, ancho completo) -->
+                                    <Border Grid.Row="1" BackgroundColor="#E8F5E9" 
+                                            StrokeShape="RoundRectangle 10" 
+                                            Padding="0,10" 
+                                            StrokeThickness="0">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnVenderTapped" />
+                                        </Border.GestureRecognizers>
+                                        <HorizontalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                                            <Label Text="➕" FontSize="12" VerticalOptions="Center" />
+                                            <Label Text="Registrar Venta" TextColor="#2E7D32" FontSize="13" FontAttributes="Bold" VerticalOptions="Center" />
                                         </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-
-                                    <!-- Lado Derecho: Precio y Bolita Verde/Roja con estado -->
-                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End" Spacing="4">
-                                        <!-- Precio Actual -->
-                                        <Label Text="{Binding precio_formateado}" 
-                                               TextColor="#0F172A" 
-                                               FontSize="15" 
-                                               FontAttributes="Bold" 
-                                               HorizontalOptions="End" />
-
-                                        <!-- Bolita verde o roja solicitada por el usuario -->
-                                        <Border BackgroundColor="{Binding estado_bg}" 
-                                                StrokeShape="RoundRectangle 12" 
-                                                Padding="8,3" 
-                                                StrokeThickness="0" 
-                                                HorizontalOptions="End">
-                                            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                                <!-- Bolita indicadora Verde o Roja -->
-                                                <Border BackgroundColor="{Binding estado_color}" 
-                                                        StrokeShape="Ellipse" 
-                                                        WidthRequest="8" 
-                                                        HeightRequest="8" 
-                                                        StrokeThickness="0" 
-                                                        VerticalOptions="Center" />
-                                                <!-- Texto Estado -->
-                                                <Label Text="{Binding estado_texto}" 
-                                                       TextColor="{Binding estado_text_color}" 
-                                                       FontSize="11" 
-                                                       FontAttributes="Bold" 
-                                                       VerticalOptions="Center" />
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                        <!-- Botón Registrar Venta -->
-                                        <Border BackgroundColor="#8BC34A" 
-                                                StrokeShape="RoundRectangle 8" 
-                                                Padding="12,6" 
-                                                StrokeThickness="0" 
-                                                HorizontalOptions="End"
-                                                Margin="0,5,0,0">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Tapped="OnVenderTapped" />
-                                            </Border.GestureRecognizers>
-                                            <Label Text="Registrar" TextColor="#FFFFFF" FontSize="12" FontAttributes="Bold" />
-                                        </Border>
-                                    </VerticalStackLayout>
-
+                                    </Border>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -265,38 +263,38 @@
             <Grid ColumnDefinitions="*, *, *, *">
 
                 <!-- Dashboard -->
-                <VerticalStackLayout Grid.Column="0" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Grid.Column="0" Spacing="2" HorizontalOptions="Fill" VerticalOptions="Center">
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnDashboardTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
-                    <Label Text="🏠" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="DASHBOARD" TextColor="#475569" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="🏠" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Text="DASHBOARD" TextColor="#475569" FontSize="9" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
                 <!-- Servicios (Activo en esta página) -->
-                <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="Center">
+                <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="Fill" VerticalOptions="Center">
                     <Border BackgroundColor="#E8F5E9" StrokeShape="RoundRectangle 10" WidthRequest="40" HeightRequest="26" StrokeThickness="0" HorizontalOptions="Center">
                         <Label Text="🧺" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
-                    <Label Text="SERVICIOS" TextColor="#0277BD" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Label Text="SERVICIOS" TextColor="#0277BD" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
                 <!-- Operaciones -->
-                <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="Fill" VerticalOptions="Center">
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnAlertasTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
-                    <Label Text="⚙️" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="OPERAC." TextColor="#475569" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="⚙️" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Text="OPERAC." TextColor="#475569" FontSize="9" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
                 <!-- Analítica -->
-                <VerticalStackLayout Grid.Column="3" Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Grid.Column="3" Spacing="2" HorizontalOptions="Fill" VerticalOptions="Center">
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnAnaliticaTapped"/>
                     </VerticalStackLayout.GestureRecognizers>
-                    <Label Text="📊" FontSize="16" HorizontalOptions="Center" />
-                    <Label Text="ANALÍTICA" TextColor="#475569" FontSize="9" HorizontalOptions="Center" />
+                    <Label Text="📊" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Text="ANALÍTICA" TextColor="#475569" FontSize="9" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
             </Grid>
@@ -340,6 +338,37 @@
                             <Label Text="Total a Cobrar" TextColor="#475569" FontSize="11" HorizontalOptions="End" />
                             <Label x:Name="lblModalTotal" Text="$0.00" TextColor="#34D399" FontSize="22" FontAttributes="Bold" HorizontalOptions="End" />
                         </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Estado y Método de Pago" TextColor="#475569" FontSize="12" Margin="0,10,0,0" FontAttributes="Bold"/>
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,5,0,10">
+                        <Border Grid.Column="0" Stroke="#E2E8F0" StrokeThickness="1" BackgroundColor="#F8FAFC" Padding="5,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Picker x:Name="pckEstadoPago" Title="Estado" TextColor="#0F172A" TitleColor="#94A3B8" FontSize="14" SelectedIndex="0">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Pagado</x:String>
+                                        <x:String>Pendiente</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                        </Border>
+                        <Border Grid.Column="1" Stroke="#E2E8F0" StrokeThickness="1" BackgroundColor="#F8FAFC" Padding="5,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Picker x:Name="pckMetodoPago" Title="Método" TextColor="#0F172A" TitleColor="#94A3B8" FontSize="14" SelectedIndex="0">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Efectivo</x:String>
+                                        <x:String>Tarjeta</x:String>
+                                        <x:String>Transferencia</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                        </Border>
                     </Grid>
 
                     <Button x:Name="btnConfirmarVenta" Text="Confirmar Venta" BackgroundColor="#8BC34A" TextColor="#FFFFFF" FontSize="15" FontAttributes="Bold" CornerRadius="12" Margin="0,10,0,10" HeightRequest="50" Clicked="OnConfirmarVentaClicked" />
