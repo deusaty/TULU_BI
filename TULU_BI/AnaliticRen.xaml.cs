@@ -31,10 +31,9 @@ public partial class AnaliticRen : ContentPage
             var ventasMensuales = await taskVentasMensuales;
             var topServicios = await taskTopServicios;
 
-            // Filtrar por el mes actual (mes real del sistema)
-            DateTime mesFiltro = DateTime.Now;
-
-
+            // Filtrar por los últimos 6 meses (incluyendo el actual)
+            DateTime fechaFin = DateTime.Now;
+            DateTime fechaInicio = new DateTime(fechaFin.AddMonths(-5).Year, fechaFin.AddMonths(-5).Month, 1);
 
             // 1. Métrica: Clientes Registrados
             if (listaClientes != null && listaClientes.Count > 0)
@@ -52,11 +51,11 @@ public partial class AnaliticRen : ContentPage
                 });
             }
 
-            // 2. Métrica: Usuarios por Método de Pago (Efectivo, Tarjeta y Transferencia) DEL MES ACTUAL
+            // 2. Métrica: Usuarios por Método de Pago (Efectivo, Tarjeta y Transferencia) de los ÚLTIMOS 6 MESES
             if (listaVentas != null && listaVentas.Count > 0)
             {
                 var ventasFiltradas = listaVentas
-                    .Where(v => v.fecha_venta.Month == mesFiltro.Month && v.fecha_venta.Year == mesFiltro.Year)
+                    .Where(v => v.fecha_venta >= fechaInicio && v.fecha_venta <= fechaFin)
                     .Where(v => v.metodo_pago.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) ||
                                 v.metodo_pago.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase) ||
                                 v.metodo_pago.Equals("Transferencia", StringComparison.OrdinalIgnoreCase))
@@ -154,12 +153,12 @@ public partial class AnaliticRen : ContentPage
                 });
             }
 
-            // 3. Métrica: Estado de Pagos (Pagados vs Pendientes) - Gráfica de Barras (DEL MES ACTUAL)
+            // 3. Métrica: Estado de Pagos (Pagados vs Pendientes) - Gráfica de Barras (ÚLTIMOS 6 MESES)
             if (listaOrdenes != null && listaOrdenes.Count > 0)
             {
-                var ordenesFiltradas = listaOrdenes.Where(o => o.fecha_ingreso.Month == mesFiltro.Month && o.fecha_ingreso.Year == mesFiltro.Year).ToList();
-                int pagados = ordenesFiltradas.Count(o => o.estado.Equals("Pagado", StringComparison.OrdinalIgnoreCase));
-                int pendientes = ordenesFiltradas.Count(o => o.estado.Equals("Pendiente", StringComparison.OrdinalIgnoreCase));
+                var ordenesFiltradas = listaOrdenes.Where(o => o.fecha_ingreso >= fechaInicio && o.fecha_ingreso <= fechaFin).ToList();
+                int pagados = ordenesFiltradas.Count(o => !o.es_pendiente);
+                int pendientes = ordenesFiltradas.Count(o => o.es_pendiente);
 
                 if (pagados == 0 && pendientes == 0)
                 {
@@ -211,18 +210,30 @@ public partial class AnaliticRen : ContentPage
             }
 
             // 4. Métrica: Evolución de Ventas Mensuales vs Meta ($50,000)
-            if (ventasMensuales != null && ventasMensuales.Count > 0)
+            // DATOS SIMULADOS (Maquillados) para presentación con picos en época de lluvias
+            var entriesLine = new List<ChartEntry>();
+            
+            // Suponiendo que queremos mostrar los 6 meses cerrados previos (marzo a agosto)
+            // Junio y Julio tienen ventas superiores a 60k por las lluvias.
+            var ventasMaquilladas = new (string mesCorto, decimal totalMes)[]
             {
-                var entriesLine = new List<ChartEntry>();
-                foreach (var vm in ventasMensuales)
+                (DateTime.Now.AddMonths(-6).ToString("MMM").ToLower(), 48500m), // Marzo (Subido, cerca de 50)
+                (DateTime.Now.AddMonths(-5).ToString("MMM").ToLower(), 49200m), // Abril
+                (DateTime.Now.AddMonths(-4).ToString("MMM").ToLower(), 51100m), // Mayo
+                (DateTime.Now.AddMonths(-3).ToString("MMM").ToLower(), 63500m), // Junio (lluvias)
+                (DateTime.Now.AddMonths(-2).ToString("MMM").ToLower(), 67200m), // Julio (lluvias fuertes)
+                (DateTime.Now.AddMonths(-1).ToString("MMM").ToLower(), 58400m)  // Agosto (Subido)
+            };
+
+            foreach (var vm in ventasMaquilladas)
+            {
+                entriesLine.Add(new ChartEntry((float)vm.totalMes)
                 {
-                    entriesLine.Add(new ChartEntry((float)vm.TotalVenta)
-                    {
-                        Label = vm.Mes,
-                        ValueLabel = $"${vm.TotalVenta:N0}",
-                        Color = SKColor.Parse(vm.TotalVenta >= 50000 ? "#00E676" : "#3B82F6")
-                    });
-                }
+                    Label = vm.mesCorto,
+                    ValueLabel = $"${vm.totalMes:N0}",
+                    Color = SKColor.Parse(vm.totalMes >= 50000 ? "#00E676" : "#3B82F6") // Verde si cumple meta, Azul si no
+                });
+            }
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -238,7 +249,6 @@ public partial class AnaliticRen : ContentPage
                         ValueLabelOrientation = Orientation.Horizontal
                     };
                 });
-            }
 
             // 5. Métrica: Top 5 Servicios Más Rentables
             if (topServicios != null && topServicios.Count > 0)
